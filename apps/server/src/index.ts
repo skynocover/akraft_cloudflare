@@ -71,8 +71,14 @@ app.use('/*', async (c, next) => {
   await next();
 });
 
+// Import HonoX routes
+import helloApi from './app/routes/api/hello';
+import Home from './app/routes/index';
+
+app.route('/api/hello', helloApi);
+
 app.get('/', (c) => {
-  return c.text('OK');
+  return c.html(Home());
 });
 
 export default app;

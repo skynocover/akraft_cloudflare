@@ -9,24 +9,25 @@
     "dev": "wrangler dev"
   },
   "dependencies": {
-    "hono": "catalog:",
-    "@orpc/server": "catalog:",
+    "@akraft-cloudflare/api": "workspace:*",
+    "@akraft-cloudflare/auth": "workspace:*",
+    "@akraft-cloudflare/db": "workspace:*",
     "@orpc/openapi": "catalog:",
+    "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
-    "zod": "catalog:",
-    "@akraft-cloudflare/api": "workspace:*",
-    "@akraft-cloudflare/auth": "workspace:*",
-    "@akraft-cloudflare/db": "workspace:*"
+    "hono": "catalog:",
+    "honox": "^0.1.52",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "typescript": "catalog:",
-    "tsdown": "^0.16.5",
     "@akraft-cloudflare/config": "workspace:*",
-    "alchemy": "^0.81.1",
-    "wrangler": "^4.40.3",
+    "@cloudflare/workers-types": "catalog:",
     "@types/node": "^22.13.11",
-    "@cloudflare/workers-types": "catalog:"
+    "alchemy": "^0.81.1",
+    "tsdown": "^0.16.5",
+    "typescript": "catalog:",
+    "wrangler": "^4.40.3"
   }
 }
