@@ -1,0 +1,30 @@
+{
+  "name": "akraft-cloudflare",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "dev:native": "turbo -F native dev",
+    "dev:web": "turbo -F web dev",
+    "dev:server": "turbo -F server dev",
+    "db:push": "turbo -F @akraft-cloudflare/db db:push",
+    "db:generate": "turbo -F @akraft-cloudflare/db db:generate"
+  },
+  "dependencies": {
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "typescript": "catalog:",
+    "@types/node": "^22.13.11",
+    "@cloudflare/workers-types": "catalog:"
+  },
+  "packageManager": "pnpm@10.15.0"
+}
