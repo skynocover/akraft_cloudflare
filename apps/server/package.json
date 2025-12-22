@@ -1,6 +1,6 @@
 {
   "name": "server",
-  "main": "src/index.ts",
+  "main": "src/index.tsx",
   "type": "module",
   "scripts": {
     "build": "tsdown",
@@ -16,9 +16,12 @@
     "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
     "better-auth": "catalog:",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "dotenv": "catalog:",
     "hono": "catalog:",
     "honox": "^0.1.52",
+    "tailwind-merge": "^3.3.1",
     "zod": "catalog:"
   },
   "devDependencies": {

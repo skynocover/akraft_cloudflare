@@ -1,7 +1,7 @@
-import { NotFoundHandler } from 'honox/types';
+import type { Context } from 'hono';
 
-const handler: NotFoundHandler = (c) => {
-  return c.render(
+const handler = (c: Context) => {
+  return c.html(
     <html>
       <head>
         <meta charset="utf-8" />

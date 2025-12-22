@@ -90,6 +90,12 @@ importers:
       better-auth:
         specifier: 'catalog:'
         version: 1.4.5(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(solid-js@1.9.10)
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       dotenv:
         specifier: 'catalog:'
         version: 17.2.3
@@ -99,6 +105,9 @@ importers:
       honox:
         specifier: ^0.1.52
         version: 0.1.52(hono@4.11.0)(miniflare@4.20251210.0)(wrangler@4.54.0(@cloudflare/workers-types@4.20251213.0))
+      tailwind-merge:
+        specifier: ^3.3.1
+        version: 3.4.0
       zod:
         specifier: 'catalog:'
         version: 4.1.13

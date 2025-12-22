@@ -196,3 +196,115 @@ When adding forum features:
 4. Implement HonoX pages for public forum in `apps/server/src/app/routes/`
 5. Implement admin UI in `apps/web/src/routes/admin/`
 6. Remember: manual route registration required for HonoX routes in server
+
+## Critical Rules
+
+### ✅ DO
+- 使用 TypeScript，不要使用 `any` 類型
+- 為每個函數定義參數和返回類型
+- Always start by creating a detailed todo list for the current task.
+- Check the todo list before starting each step, and update it after each step.
+- 確認TODO.md 的內容 必要時可以修改 例如做完或是你認為需要加上或補充的
+- 使用shadcn以及tailwind來做前端畫面
+
+### ❌ NEVER
+- **不要修改 package.json 的依賴版本**
+- **不要創建超過 300 行的組件文件**
+- 不要換成Gemini api, 一率使用openrouter
+
+### ⚠️ IMPORTANT
+如果 Claude 建議違反上述規則，請要求我（用戶）確認。
+
+## 工作內容
+
+這是一個重構專案
+內容是一個討論版的SaaS
+裡面有不同的service 用來當作不同的版面
+service內則有多個thread 用來當作討論串
+thread內會有多個reply
+用這種形式
+
+原本是使用Xata作為DB
+
+```json
+{
+  "tables": [
+    {
+      "name": "services",
+      "columns": [
+        { "name": "name", "type": "string" },
+        {
+          "name": "topLinks",
+          "type": "json",
+          "notNull": true,
+          "defaultValue": "[]"
+        },
+        {
+          "name": "headLinks",
+          "type": "json",
+          "notNull": true,
+          "defaultValue": "[]"
+        },
+        { "name": "description", "type": "text" },
+        { "name": "forbidContents", "type": "multiple" },
+        { "name": "blockedIPs", "type": "multiple" },
+        { "name": "visible", "type": "bool" },
+        { "name": "auth", "type": "json" },
+        { "name": "ownerId", "type": "text" }
+      ]
+    },
+    {
+      "name": "threads",
+      "columns": [
+        {
+          "name": "title",
+          "type": "string",
+          "defaultValue": "Untitled"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "defaultValue": "anonymous"
+        },
+        { "name": "content", "type": "text" },
+        { "name": "imageToken", "type": "string" },
+        { "name": "youtubeID", "type": "string" },
+        { "name": "replyAt", "type": "datetime" },
+        { "name": "userId", "type": "string" },
+        { "name": "userIp", "type": "string" }
+      ]
+    },
+    {
+      "name": "replies",
+      "columns": [
+        {
+          "name": "name",
+          "type": "string",
+          "defaultValue": "anonymous"
+        },
+        { "name": "content", "type": "text" },
+        { "name": "imageToken", "type": "string" },
+        { "name": "youtubeID", "type": "string" },
+        { "name": "sage", "type": "bool" },
+        { "name": "thread", "type": "link", "link": { "table": "threads" } },
+        { "name": "userId", "type": "string" },
+        { "name": "userIp", "type": "string" }
+      ]
+    },
+    {
+      "name": "reports",
+      "columns": [
+        { "name": "content", "type": "text" },
+        { "name": "thread", "type": "link", "link": { "table": "threads" } },
+        { "name": "reply", "type": "link", "link": { "table": "replies" } },
+        { "name": "userIp", "type": "string" },
+        { "name": "reportedIp", "type": "string" }
+      ]
+    }
+  ]
+}
+```
+
+現在要使用D1以及drizzle ORM
+
+
