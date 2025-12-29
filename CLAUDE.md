@@ -196,3 +196,29 @@ When adding forum features:
 4. Implement HonoX pages for public forum in `apps/server/src/app/routes/`
 5. Implement admin UI in `apps/web/src/routes/admin/`
 6. Remember: manual route registration required for HonoX routes in server
+
+## Critical Rules
+
+### ✅ DO
+- 使用 TypeScript，不要使用 `any` 類型
+- 為每個函數定義參數和返回類型
+- Always start by creating a detailed todo list for the current task.
+- Check the todo list before starting each step, and update it after each step.
+- 確認TODO.md 的內容 必要時可以修改 例如做完或是你認為需要加上或補充的
+- 重構時，盡可能使用我給你的程式碼，而不是直接重寫一份新的，目的是讓畫面跟之前保持相同
+- 除非Shadcn沒有或是我指定，不然只能使用Shadcn當作元件 而不是自己做一個
+- 需要shadcn時 使用指令安裝新的shadcn元件
+- 資料庫會使用D1, Drizzle ORM, 開發時使用本地D1
+- 儲存檔案使用R2 開發時使用本地R2
+- 登入使用Better Auth, 登入相關頁面則使用Better Auth UI
+- 在測試時 開啟了服務需要關閉 否則port會被佔用
+- 使用axios而不是fetch
+
+### ❌ NEVER
+- **不要修改 package.json 的依賴版本**
+- **不要創建超過 300 行的組件文件**
+- 不要自己寫CSS, 而是使用tailwind
+- 不要使用Alchemy來做部署
+
+### ⚠️ IMPORTANT
+如果 Claude 建議違反上述規則，請要求我（用戶）確認。
