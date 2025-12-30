@@ -35,8 +35,9 @@ export const MediaContent: FC<{
         <img
           src={imageURL}
           alt="Post image"
-          class="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+          class="max-w-full max-h-[800px] w-auto h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity object-contain"
           loading="lazy"
+          onclick={`openLightbox('${imageURL}')`}
         />
       </div>
     );

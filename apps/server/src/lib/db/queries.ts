@@ -21,9 +21,42 @@ function parseJsonField<T>(value: string | null | undefined, defaultValue: T): T
   }
 }
 
+// Check if imageToken is new R2 format (starts with img_)
+function isR2ImageToken(imageToken: string): boolean {
+  return imageToken.startsWith('img_');
+}
+
+// Image URL options
+interface ImageUrlOptions {
+  r2PublicUrl?: string;
+  cloudflareImagesUrl?: string;
+}
+
 // Convert imageToken to full image URL
-function getImageUrl(imageToken: string | null | undefined): string | undefined {
+// - Old format (Cloudflare Images): uses cloudflareImagesUrl
+// - New format (R2): uses r2PublicUrl if set, otherwise /api/images/:token
+function getImageUrl(
+  imageToken: string | null | undefined,
+  options?: ImageUrlOptions
+): string | undefined {
   if (!imageToken) return undefined;
+
+  // Old Cloudflare Images format
+  if (!isR2ImageToken(imageToken)) {
+    if (options?.cloudflareImagesUrl) {
+      return `${options.cloudflareImagesUrl}/${imageToken}/public`;
+    }
+    // Fallback: return token as-is (shouldn't happen in production)
+    return imageToken;
+  }
+
+  // New R2 format
+  if (options?.r2PublicUrl) {
+    // Production: use R2 public URL
+    return `${options.r2PublicUrl}/images/${imageToken}`;
+  }
+
+  // Local development: use API endpoint
   return `/api/images/${imageToken}`;
 }
 
@@ -58,7 +91,8 @@ export async function getThreads(
   db: DbInstance,
   serviceId: string,
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 10,
+  imageUrlOptions?: ImageUrlOptions
 ): Promise<{ threads: ThreadWithReplies[]; totalPages: number }> {
   // Get total count
   const countResult = await db
@@ -96,7 +130,7 @@ export async function getThreads(
         userId: reply.userId || undefined,
         userIp: reply.userIp || undefined,
         imageToken: reply.imageToken || undefined,
-        image: getImageUrl(reply.imageToken),
+        image: getImageUrl(reply.imageToken, imageUrlOptions),
         youtubeID: reply.youtubeId || undefined,
         sage: reply.sage || false,
         createdAt: new Date(reply.createdAt),
@@ -111,7 +145,7 @@ export async function getThreads(
         userId: thread.userId || undefined,
         userIp: thread.userIp || undefined,
         imageToken: thread.imageToken || undefined,
-        image: getImageUrl(thread.imageToken),
+        image: getImageUrl(thread.imageToken, imageUrlOptions),
         youtubeID: thread.youtubeId || undefined,
         replyAt: new Date(thread.replyAt),
         createdAt: new Date(thread.createdAt),
@@ -127,7 +161,8 @@ export async function getThreads(
 export async function getThread(
   db: DbInstance,
   serviceId: string,
-  threadId: string
+  threadId: string,
+  imageUrlOptions?: ImageUrlOptions
 ): Promise<ThreadWithReplies | null> {
   const threadRows = await db
     .select()
@@ -156,7 +191,7 @@ export async function getThread(
     userId: reply.userId || undefined,
     userIp: reply.userIp || undefined,
     imageToken: reply.imageToken || undefined,
-    image: getImageUrl(reply.imageToken),
+    image: getImageUrl(reply.imageToken, r2PublicUrl),
     youtubeID: reply.youtubeId || undefined,
     sage: reply.sage || false,
     createdAt: new Date(reply.createdAt),
@@ -171,7 +206,7 @@ export async function getThread(
     userId: thread.userId || undefined,
     userIp: thread.userIp || undefined,
     imageToken: thread.imageToken || undefined,
-    image: getImageUrl(thread.imageToken),
+    image: getImageUrl(thread.imageToken, r2PublicUrl),
     youtubeID: thread.youtubeId || undefined,
     replyAt: new Date(thread.replyAt),
     createdAt: new Date(thread.createdAt),

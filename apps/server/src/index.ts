@@ -111,8 +111,12 @@ app.get('/service/:serviceId', async (c) => {
 
   const db = createDb(env.DB);
   const service = await getService(db, serviceId);
+  const imageUrlOptions = {
+    r2PublicUrl: env.R2_PUBLIC_URL,
+    cloudflareImagesUrl: env.CLOUDFLARE_IMAGES_URL,
+  };
   const { threads, totalPages } = service
-    ? await getThreads(db, serviceId, page, 10)
+    ? await getThreads(db, serviceId, page, 10, imageUrlOptions)
     : { threads: [], totalPages: 0 };
 
   const html = ServicePage({ serviceId, page, service, threads, totalPages, adminUrl });
@@ -127,7 +131,11 @@ app.get('/service/:serviceId/:threadId', async (c) => {
 
   const db = createDb(env.DB);
   const service = await getService(db, serviceId);
-  const thread = await getThread(db, serviceId, threadId);
+  const imageUrlOptions = {
+    r2PublicUrl: env.R2_PUBLIC_URL,
+    cloudflareImagesUrl: env.CLOUDFLARE_IMAGES_URL,
+  };
+  const thread = await getThread(db, serviceId, threadId, imageUrlOptions);
 
   const html = ThreadPage({ serviceId, service, thread, adminUrl });
   return c.html(html as string);
