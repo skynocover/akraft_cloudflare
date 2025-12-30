@@ -179,11 +179,11 @@ export async function getThread(
   };
 }
 
-// Generate unique ID (similar to xata rec_xxx format)
-export function generateId(prefix: string = "rec"): string {
+// Generate unique ID
+export function generateId(): string {
   const timestamp = Date.now().toString(36);
   const random = Math.random().toString(36).substring(2, 10);
-  return `${prefix}_${timestamp}${random}`;
+  return `${timestamp}${random}`;
 }
 
 // Generate consistent user ID from IP + date (same IP on same day = same ID)
@@ -218,7 +218,7 @@ export async function createThread(
     userIp?: string;
   }
 ): Promise<string> {
-  const id = generateId("thread");
+  const id = generateId();
   const now = new Date();
 
   await db.insert(schema.threads).values({
@@ -252,7 +252,7 @@ export async function createReply(
     userIp?: string;
   }
 ): Promise<string> {
-  const id = generateId("reply");
+  const id = generateId();
   const now = new Date();
 
   await db.insert(schema.replies).values({
@@ -291,7 +291,7 @@ export async function createReport(
     reportedIp?: string;
   }
 ): Promise<string> {
-  const id = generateId("report");
+  const id = generateId();
 
   await db.insert(schema.reports).values({
     id,
