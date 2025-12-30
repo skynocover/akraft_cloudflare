@@ -3,6 +3,7 @@ import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
+import { markdownToHtml } from "../../lib/utils";
 
 // Upload SVG Icon
 const UploadIcon = () => (
@@ -89,6 +90,8 @@ export const PostCard: FC<PostCardProps> = ({
   const uniqueId = modalId || `${threadId || "new"}-${isModal ? "modal" : "page"}`;
   const formId = `postcard-form-${uniqueId}`;
   const tabsId = `tabs-${uniqueId}`;
+  const previewId = `preview-${uniqueId}`;
+  const contentId = `content-${uniqueId}`;
 
   return (
     <Card
@@ -106,7 +109,23 @@ export const PostCard: FC<PostCardProps> = ({
             <CloseIcon />
           </button>
         )}
-        <form id={formId} action={actionUrl} method="post" enctype="multipart/form-data" class="space-y-2">
+        <form
+          id={formId}
+          action={actionUrl}
+          method="post"
+          enctype="multipart/form-data"
+          class="space-y-2"
+          onsubmit={`
+            var content = document.getElementById('${contentId}').value.trim();
+            var fileInput = document.querySelector('#${formId} input[name="image"]');
+            var hasImage = fileInput && fileInput.files && fileInput.files.length > 0;
+            if (!content && !hasImage) {
+              alert('Please enter content or upload an image');
+              return false;
+            }
+            return true;
+          `}
+        >
           {threadId && <input type="hidden" name="threadId" value={threadId} />}
 
           <div class="flex space-x-2">
@@ -126,13 +145,53 @@ export const PostCard: FC<PostCardProps> = ({
           </div>
 
           <div class="relative">
+            {/* Eye icon for preview toggle */}
+            <button
+              type="button"
+              id={`${previewId}-btn`}
+              class="absolute top-2 right-2 p-1 text-gray-400 hover:text-blue-500 hover:bg-gray-100 rounded z-10"
+              title="Preview"
+              onclick={`(function(){
+                var textarea = document.getElementById('${contentId}');
+                var preview = document.getElementById('${previewId}');
+                var btn = document.getElementById('${previewId}-btn');
+                var isPreviewMode = !preview.classList.contains('hidden');
+                if (isPreviewMode) {
+                  textarea.classList.remove('hidden');
+                  preview.classList.add('hidden');
+                  btn.title = 'Preview';
+                  textarea.focus();
+                } else {
+                  var text = textarea.value || '';
+                  if (!text.trim()) {
+                    preview.innerHTML = '<span class=\"text-gray-400\">Nothing to preview...</span>';
+                  } else {
+                    preview.innerHTML = markdownToHtml(text);
+                  }
+                  textarea.classList.add('hidden');
+                  preview.classList.remove('hidden');
+                  btn.title = 'Edit';
+                }
+              })()`}
+            >
+              <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
             <Textarea
+              id={contentId}
               name="content"
-              placeholder="Content (supports Markdown)"
-              class="h-40 text-sm border"
-              required
+              placeholder="Content (supports Markdown: # Header, - List, **bold**, *italic*)"
+              class="h-40 text-sm border pr-10"
               value={initContent}
             />
+            <div
+              id={previewId}
+              class="h-40 p-3 bg-gray-50 rounded border text-sm overflow-y-auto hidden"
+            >
+              <span class="text-gray-400">Nothing to preview...</span>
+            </div>
           </div>
 
           {/* Tabs for Upload/YouTube */}
@@ -214,9 +273,10 @@ export const PostCard: FC<PostCardProps> = ({
           </div>
 
           {!isReply && description && (
-            <div class="text-sm text-gray-500 whitespace-pre-wrap p-2 bg-gray-50 rounded">
-              {description}
-            </div>
+            <div
+              class="text-sm text-gray-600 p-2 bg-gray-50 rounded prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ __html: markdownToHtml(description) }}
+            />
           )}
 
           <div class="flex gap-2">

@@ -29,7 +29,7 @@ export const ThreadPage: FC<ThreadPageProps> = ({
               href={`/service/${serviceId}`}
               class="text-blue-500 hover:underline mt-4 inline-block"
             >
-              Back to Service
+              ← Back
             </a>
           </div>
         </div>
@@ -43,13 +43,13 @@ export const ThreadPage: FC<ThreadPageProps> = ({
         <TopLink links={service.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} />
         <Title title={service.name || ""} links={service.headLinks || []} />
 
-        {/* Back to service link */}
+        {/* Back link */}
         <div class="mb-4">
           <a
             href={`/service/${serviceId}`}
             class="text-blue-500 hover:underline text-sm"
           >
-            ← Back to Service
+            ← Back
           </a>
         </div>
 

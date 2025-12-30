@@ -186,6 +186,24 @@ export function generateId(prefix: string = "rec"): string {
   return `${prefix}_${timestamp}${random}`;
 }
 
+// Generate consistent user ID from IP + date (same IP on same day = same ID)
+export async function generateUserIdFromIp(ip: string): Promise<string> {
+  // Get today's date in YYYY-MM-DD format (UTC)
+  const today = new Date().toISOString().split('T')[0];
+  const data = `${ip}-${today}`;
+
+  // Hash using Web Crypto API (available in Cloudflare Workers)
+  const encoder = new TextEncoder();
+  const dataBuffer = encoder.encode(data);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+
+  // Convert to hex and take first 8 characters
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+  return hashHex.substring(0, 8);
+}
+
 // Create a new thread
 export async function createThread(
   db: DbInstance,

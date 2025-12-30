@@ -1,4 +1,5 @@
 import type { FC, PropsWithChildren } from "hono/jsx";
+import { markdownToHtmlScript } from "../lib/utils";
 
 // CSS 變數定義（與 shadcn 相容）
 const cssVariables = `
@@ -127,6 +128,7 @@ export const Layout: FC<LayoutProps> = ({ children, title = "Forum" }) => {
         <style dangerouslySetInnerHTML={{ __html: cssVariables }} />
       </head>
       <body class="min-h-screen bg-background font-sans antialiased">
+        <script dangerouslySetInnerHTML={{ __html: markdownToHtmlScript }} />
         {children}
       </body>
     </html>

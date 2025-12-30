@@ -96,7 +96,7 @@ export const Thread: FC<ThreadComponentProps> = ({
         <CardFooter class="flex flex-col pt-4">
           <Separator class="mb-4" />
 
-          {/* Expand/Collapse Button for hidden replies */}
+          {/* Preview mode: Show expand/collapse for hidden replies */}
           {isPreview && hiddenRepliesCount > 0 && (
             <>
               <button
@@ -118,7 +118,7 @@ export const Thread: FC<ThreadComponentProps> = ({
                 <ChevronDownIcon /> Show All {thread.replies.length} Replies
               </button>
 
-              {/* Hidden Replies Container */}
+              {/* Hidden Replies Container (preview mode) */}
               <div id={hiddenRepliesId} class="w-full" style="display: none;">
                 {hiddenReplies.map((reply, index) => (
                   <div key={reply.id} class="scroll-mt-20 mb-4" id={reply.id}>
@@ -148,32 +148,63 @@ export const Thread: FC<ThreadComponentProps> = ({
             </>
           )}
 
-          {/* Visible Replies (always shown) */}
-          <div class="space-y-4 w-full">
-            {previewReplies.map((reply, index) => (
-              <div key={reply.id} class="scroll-mt-20" id={reply.id}>
-                {index > 0 && <Separator class="mb-4" />}
-                <div>
-                  <PostMeta
-                    name={reply.name || "Anonymous"}
-                    userId={reply.userId}
-                    createdAt={reply.createdAt}
-                    threadId={thread.id}
-                    replyId={reply.id}
-                    serviceId={serviceId}
-                    serviceOwnerId={serviceOwnerId}
-                  />
-                  <div class="mt-2">
-                    <PostComponent
-                      imageURL={reply.image}
-                      content={reply.content || ""}
-                      youtubeID={reply.youtubeID}
+          {/* Full page mode: Show ALL replies */}
+          {!isPreview && (
+            <div class="space-y-4 w-full">
+              {thread.replies.map((reply, index) => (
+                <div key={reply.id} class="scroll-mt-20" id={reply.id}>
+                  {index > 0 && <Separator class="mb-4" />}
+                  <div>
+                    <PostMeta
+                      name={reply.name || "Anonymous"}
+                      userId={reply.userId}
+                      createdAt={reply.createdAt}
+                      threadId={thread.id}
+                      replyId={reply.id}
+                      serviceId={serviceId}
+                      serviceOwnerId={serviceOwnerId}
                     />
+                    <div class="mt-2">
+                      <PostComponent
+                        imageURL={reply.image}
+                        content={reply.content || ""}
+                        youtubeID={reply.youtubeID}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+
+          {/* Preview mode: Show last 5 replies */}
+          {isPreview && (
+            <div class="space-y-4 w-full">
+              {previewReplies.map((reply, index) => (
+                <div key={reply.id} class="scroll-mt-20" id={reply.id}>
+                  {index > 0 && <Separator class="mb-4" />}
+                  <div>
+                    <PostMeta
+                      name={reply.name || "Anonymous"}
+                      userId={reply.userId}
+                      createdAt={reply.createdAt}
+                      threadId={thread.id}
+                      replyId={reply.id}
+                      serviceId={serviceId}
+                      serviceOwnerId={serviceOwnerId}
+                    />
+                    <div class="mt-2">
+                      <PostComponent
+                        imageURL={reply.image}
+                        content={reply.content || ""}
+                        youtubeID={reply.youtubeID}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardFooter>
       )}
     </Card>

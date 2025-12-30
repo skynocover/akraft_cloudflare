@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx";
 import { ReplyNoButton } from "./ReplyButton";
 import { ReportButton } from "./ReportButton";
+import { markdownToHtml } from "../../lib/utils";
 
 // Simple time formatting function
 const formatTime = (date: Date): string => {
@@ -13,98 +14,13 @@ const formatTime = (date: Date): string => {
   return `${year}/${month}/${day} ${hours}:${minutes}`;
 };
 
-// Simple Markdown rendering (SSR compatible)
+// Markdown rendering using shared markdownToHtml function
 export const PostContent: FC<{ content: string }> = ({ content }) => {
-  const lines = content.split("\n");
-
   return (
-    <div class="prose prose-sm max-w-none break-words">
-      {lines.map((line, index) => {
-        // Handle headings
-        if (line.startsWith("### ")) {
-          return (
-            <h3 key={index} class="text-lg font-semibold mb-2">
-              {line.slice(4)}
-            </h3>
-          );
-        }
-        if (line.startsWith("## ")) {
-          return (
-            <h2 key={index} class="text-xl font-semibold mb-3">
-              {line.slice(3)}
-            </h2>
-          );
-        }
-        if (line.startsWith("# ")) {
-          return (
-            <h1 key={index} class="text-2xl font-bold mb-4">
-              {line.slice(2)}
-            </h1>
-          );
-        }
-        // Handle >> quotes (reply references)
-        if (line.startsWith(">> ")) {
-          const refId = line.slice(3).trim();
-          return (
-            <p
-              key={index}
-              class="text-blue-500 hover:underline cursor-pointer mb-1"
-              onclick={`document.getElementById('${refId}')?.scrollIntoView({behavior:'smooth'})`}
-            >
-              {">> " + refId}
-            </p>
-          );
-        }
-        // Handle > quotes (blockquote)
-        if (line.startsWith("> ")) {
-          return (
-            <blockquote
-              key={index}
-              class="border-l-4 border-gray-300 pl-4 italic my-1 text-gray-600"
-            >
-              {line.slice(2)}
-            </blockquote>
-          );
-        }
-        // Handle lists
-        if (line.startsWith("- ") || line.startsWith("* ")) {
-          return (
-            <li key={index} class="ml-4 list-disc">
-              {line.slice(2)}
-            </li>
-          );
-        }
-        if (/^\d+\. /.test(line)) {
-          return (
-            <li key={index} class="ml-4 list-decimal">
-              {line.replace(/^\d+\. /, "")}
-            </li>
-          );
-        }
-        // Handle code block markers (simplified)
-        if (line.startsWith("```")) {
-          return null;
-        }
-        // Empty lines
-        if (line.trim() === "") {
-          return <br key={index} />;
-        }
-        // Handle bold text
-        const boldProcessed = line.replace(
-          /\*\*(.+?)\*\*/g,
-          '<strong class="font-bold">$1</strong>'
-        );
-
-        // Regular paragraph
-        return (
-          <p
-            key={index}
-            class="mb-2"
-            dangerouslySetInnerHTML={{ __html: boldProcessed }}
-          />
-        );
-      })}
-    </div>
+    <div
+      class="prose prose-sm max-w-none break-words"
+      dangerouslySetInnerHTML={{ __html: markdownToHtml(content) }}
+    />
   );
 };
 

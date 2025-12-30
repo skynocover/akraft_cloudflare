@@ -21,7 +21,7 @@ import {
   createReply,
   createReport,
   getThreadServiceId,
-  generateId,
+  generateUserIdFromIp,
 } from './lib/db/queries';
 
 // R2 upload helper
@@ -162,9 +162,15 @@ app.post('/api/service/:serviceId/thread', async (c) => {
 
   const title = formData.get('title') as string;
   const name = formData.get('name') as string || 'Anonymous';
-  const content = formData.get('content') as string;
+  const content = formData.get('content') as string || '';
   const youtubeLink = formData.get('youtubeLink') as string;
   const imageFile = formData.get('image') as File | null;
+
+  // Validate: need either content or image
+  const hasImage = imageFile && imageFile.size > 0;
+  if (!content.trim() && !hasImage) {
+    return c.text('Please enter content or upload an image', 400);
+  }
 
   // Extract YouTube ID from URL
   let youtubeId: string | undefined;
@@ -176,8 +182,8 @@ app.post('/api/service/:serviceId/thread', async (c) => {
   // Get client IP
   const userIp = c.req.header('CF-Connecting-IP') || c.req.header('X-Forwarded-For') || 'unknown';
 
-  // Generate user ID hash from IP
-  const userId = generateId('user').slice(-8);
+  // Generate user ID hash from IP + date (same IP on same day = same ID)
+  const userId = await generateUserIdFromIp(userIp);
 
   const db = createDb(env.DB);
 
@@ -251,10 +257,16 @@ app.post('/api/service/:serviceId/reply', async (c) => {
 
   const threadId = formData.get('threadId') as string;
   const name = formData.get('name') as string || 'Anonymous';
-  const content = formData.get('content') as string;
+  const content = formData.get('content') as string || '';
   const youtubeLink = formData.get('youtubeLink') as string;
   const sage = formData.get('sage') === 'on';
   const imageFile = formData.get('image') as File | null;
+
+  // Validate: need either content or image
+  const hasImage = imageFile && imageFile.size > 0;
+  if (!content.trim() && !hasImage) {
+    return c.text('Please enter content or upload an image', 400);
+  }
 
   // Extract YouTube ID from URL
   let youtubeId: string | undefined;
@@ -266,8 +278,8 @@ app.post('/api/service/:serviceId/reply', async (c) => {
   // Get client IP
   const userIp = c.req.header('CF-Connecting-IP') || c.req.header('X-Forwarded-For') || 'unknown';
 
-  // Generate user ID hash from IP
-  const userId = generateId('user').slice(-8);
+  // Generate user ID hash from IP + date (same IP on same day = same ID)
+  const userId = await generateUserIdFromIp(userIp);
 
   const db = createDb(env.DB);
 
