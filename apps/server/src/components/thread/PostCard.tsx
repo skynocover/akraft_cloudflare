@@ -123,6 +123,10 @@ export const PostCard: FC<PostCardProps> = ({
               alert('Please enter content or upload an image');
               return false;
             }
+            if (hasImage && fileInput.files[0].size > 5 * 1024 * 1024) {
+              alert('File size exceeds 5MB limit');
+              return false;
+            }
             return true;
           `}
         >
@@ -244,14 +248,23 @@ export const PostCard: FC<PostCardProps> = ({
                     accept="image/*"
                     onchange={`
                       var label = document.getElementById('${tabsId}-filename');
+                      var maxSize = 5 * 1024 * 1024;
                       if (this.files && this.files[0]) {
+                        if (this.files[0].size > maxSize) {
+                          alert('File size exceeds 5MB limit');
+                          this.value = '';
+                          label.textContent = 'Click or drag to upload image';
+                          label.classList.add('text-gray-500');
+                          label.classList.remove('text-blue-600', 'font-medium', 'text-red-500');
+                          return;
+                        }
                         label.textContent = this.files[0].name;
-                        label.classList.remove('text-gray-500');
+                        label.classList.remove('text-gray-500', 'text-red-500');
                         label.classList.add('text-blue-600', 'font-medium');
                       } else {
                         label.textContent = 'Click or drag to upload image';
                         label.classList.add('text-gray-500');
-                        label.classList.remove('text-blue-600', 'font-medium');
+                        label.classList.remove('text-blue-600', 'font-medium', 'text-red-500');
                       }
                     `}
                   />
