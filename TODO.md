@@ -37,8 +37,8 @@ service為各種版面（對應 Better Auth 的 organization）
 | 2 | Mock 畫面 - 公開論壇 | HonoX SSR 頁面（假資料） | ✅ 完成 |
 | 3 | Mock 畫面 - 管理後台 | React SPA 管理頁面（假資料） | ✅ 完成 |
 | 4 | 資料庫 Schema | threads, replies, reports 表結構 | ✅ 完成 |
-| 5 | 整合 - 公開論壇 | HonoX 直接查詢 DB | 待開始 |
-| 6 | 整合 - 管理後台 | API + 權限控制 | 待開始 |
+| 5 | 整合 - 公開論壇 | HonoX 直接查詢 DB | ✅ 完成 |
+| 6 | 整合 - 管理後台 | API + 權限控制 | ✅ 完成 |
 | 7 | 檔案上傳 | R2 整合 | 待開始 |
 | 8 | 進階功能 | 內容審核、IP封鎖等 | 待開始 |
 
@@ -201,22 +201,22 @@ reports 表:
 **目標**: HonoX 頁面直接查詢 DB（不透過 API）
 
 ### 5.1 建立資料查詢函數
-在 `apps/server/src/lib/db/` 或直接在路由中:
+在 `apps/server/src/lib/db/queries.ts`:
 
-- [ ] `getOrganization(orgId)` - 取得 service 資訊
-- [ ] `getThreads(orgId, page, pageSize)` - 取得討論串列表
-- [ ] `getThread(orgId, threadId)` - 取得單一討論串含回覆
+- [x] `getService(db, serviceId)` - 取得 service 資訊
+- [x] `getThreads(db, serviceId, page, pageSize)` - 取得討論串列表
+- [x] `getThread(db, serviceId, threadId)` - 取得單一討論串含回覆
 
 ### 5.2 替換 Mock 資料
-- [ ] `/service/:serviceId` 使用實際 DB 查詢
-- [ ] `/service/:serviceId/:threadId` 使用實際 DB 查詢
+- [x] `/service/:serviceId` 使用實際 DB 查詢
+- [x] `/service/:serviceId/:threadId` 使用實際 DB 查詢
 
 ### 5.3 實作表單提交
 建立 API endpoint（在 apps/server 中）:
 
-- [ ] `POST /api/service/:serviceId/thread` - 建立討論串
-- [ ] `POST /api/service/:serviceId/reply` - 建立回覆
-- [ ] `POST /api/service/:serviceId/report` - 建立檢舉
+- [x] `POST /api/service/:serviceId/thread` - 建立討論串
+- [x] `POST /api/service/:serviceId/reply` - 建立回覆
+- [x] `POST /api/service/:serviceId/report` - 建立檢舉
 
 ---
 
@@ -237,12 +237,26 @@ reports 表:
 ```
 
 ### 6.2 權限整合
-- [ ] 檢查用戶是否為 organization owner
-- [ ] 非 owner 顯示錯誤訊息
+- [x] 檢查用戶是否為 service owner
+- [x] 非 owner 顯示錯誤訊息
 
 ### 6.3 連接 API
-- [ ] ServiceEditor 儲存功能
-- [ ] ReportList CRUD 功能
+- [x] ServiceEditor 儲存功能
+- [x] ReportList CRUD 功能
+
+### 6.4 測試帳號
+- 帳號: user@gmail.com
+- 密碼: 123456789 (Better Auth 要求至少 8 字元)
+- 已設為 Dota2 service 的 owner
+
+### 修改
+
+- [x] 按照/src內 舊版本的admin的dashboard 實作現在的dashboard
+  - Header: 更新為 Akraft logo + Dashboard + GitHub icon + UserMenu
+  - ServiceEditor: 與舊版相同 (Name, Description, Tabs: Top Links/Head Links/Forbidden/Blocked IPs/Auth)
+  - ReportList: 與舊版相同 (Table with checkbox, delete, view actions)
+- [x] 版面上的admin 應該要轉到localhost:3001 (使用 CORS_ORIGIN 環境變數)
+- [x] 修正 VITE_SERVER_URL 為 localhost:8788
 
 ---
 

@@ -31,14 +31,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { client } from "@/utils/orpc";
 
-// Import mock data (will be replaced with ORPC calls later)
-import {
-  getMockReports,
-  deleteMockReports,
-  deleteMockThreadOrReply,
-  type Report,
-} from "@/mock/data";
+interface Report {
+  id: string;
+  content: string;
+  userIp: string;
+  reportedIp: string;
+  createdAt: Date;
+  thread: { id: string; title: string; userIp: string | null } | null;
+  reply: { id: string; content: string | null; userIp: string | null } | null;
+}
 
 interface ReportListProps {
   serviceId: string;
@@ -54,8 +57,7 @@ const ReportList: React.FC<ReportListProps> = ({ serviceId }) => {
     if (!serviceId) return;
     setIsLoading(true);
     try {
-      // Mock: Replace with ORPC call later
-      const reportData = getMockReports(serviceId);
+      const reportData = await client.admin.getReports({ serviceId });
       setReports(reportData);
     } catch (error) {
       console.error("Error fetching reports:", error);
@@ -72,14 +74,18 @@ const ReportList: React.FC<ReportListProps> = ({ serviceId }) => {
   const handleDeleteReports = async () => {
     setIsLoading(true);
     try {
-      // Mock: Replace with ORPC call later
-      deleteMockReports(selectedReports);
+      await client.admin.deleteReports({
+        serviceId,
+        reportIds: selectedReports,
+      });
       fetchReports();
       setSelectedReports([]);
       toast.success("Report(s) has been deleted.");
     } catch (error) {
       console.error("Error deleting reports:", error);
       toast.error("Failed to delete reports");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -87,24 +93,33 @@ const ReportList: React.FC<ReportListProps> = ({ serviceId }) => {
     setIsLoading(true);
     setDeletingItemId(report.id);
     try {
-      if (report.reply?.id || report.thread?.id) {
-        // Mock: Replace with ORPC call later
-        deleteMockThreadOrReply(
+      if (report.reply?.id) {
+        await client.admin.deleteReply({
           serviceId,
-          report.thread?.id,
-          report.reply?.id
-        );
-        deleteMockReports([report.id]);
-        toast.success("Thread or Reply has been deleted.");
+          replyId: report.reply.id,
+        });
+        toast.success("Reply has been deleted.");
+      } else if (report.thread?.id) {
+        await client.admin.deleteThread({
+          serviceId,
+          threadId: report.thread.id,
+        });
+        toast.success("Thread has been deleted.");
       } else {
         toast.info("No associated thread or reply to delete.");
       }
+      // Also delete the report
+      await client.admin.deleteReports({
+        serviceId,
+        reportIds: [report.id],
+      });
       fetchReports();
     } catch (error) {
       console.error("Error deleting thread or reply:", error);
       toast.error("Failed to delete. Please try again.");
     } finally {
       setDeletingItemId(null);
+      setIsLoading(false);
     }
   };
 
@@ -147,9 +162,9 @@ const ReportList: React.FC<ReportListProps> = ({ serviceId }) => {
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
-                        className="ml-1"
                         size="icon"
-                        variant="destructive"
+                        variant="outline"
+                        className="bg-red-100 hover:bg-red-200 border-red-200 text-red-600"
                         disabled={selectedReports.length === 0}
                       >
                         <Trash2 className="h-4 w-4" />

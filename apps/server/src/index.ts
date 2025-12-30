@@ -100,6 +100,7 @@ app.get('/', (c) => {
 app.get('/service/:serviceId', async (c) => {
   const serviceId = c.req.param('serviceId');
   const page = parseInt(c.req.query('page') || '1', 10);
+  const adminUrl = env.CORS_ORIGIN || '';
 
   const db = createDb(env.DB);
   const service = await getService(db, serviceId);
@@ -107,7 +108,7 @@ app.get('/service/:serviceId', async (c) => {
     ? await getThreads(db, serviceId, page, 10)
     : { threads: [], totalPages: 0 };
 
-  const html = ServicePage({ serviceId, page, service, threads, totalPages });
+  const html = ServicePage({ serviceId, page, service, threads, totalPages, adminUrl });
   return c.html(html as string);
 });
 
@@ -115,12 +116,13 @@ app.get('/service/:serviceId', async (c) => {
 app.get('/service/:serviceId/:threadId', async (c) => {
   const serviceId = c.req.param('serviceId');
   const threadId = c.req.param('threadId');
+  const adminUrl = env.CORS_ORIGIN || '';
 
   const db = createDb(env.DB);
   const service = await getService(db, serviceId);
   const thread = await getThread(db, serviceId, threadId);
 
-  const html = ThreadPage({ serviceId, service, thread });
+  const html = ThreadPage({ serviceId, service, thread, adminUrl });
   return c.html(html as string);
 });
 

@@ -4,6 +4,7 @@ import type { LinkItem } from "../../types/forum";
 interface TopLinkProps {
   serviceId: string;
   links: LinkItem[];
+  adminUrl?: string;
 }
 
 // 簡單的 External Link SVG Icon
@@ -26,7 +27,12 @@ const ExternalLinkIcon = () => (
   </svg>
 );
 
-export const TopLink: FC<TopLinkProps> = ({ serviceId, links }) => {
+export const TopLink: FC<TopLinkProps> = ({ serviceId, links, adminUrl }) => {
+  // Default to relative path if adminUrl not provided
+  const dashboardUrl = adminUrl
+    ? `${adminUrl}/dashboard/${serviceId}`
+    : `/dashboard/${serviceId}`;
+
   return (
     <div class="absolute top-2 right-2 flex items-center space-x-2 text-xs">
       {links.map((link, index) => (
@@ -41,7 +47,7 @@ export const TopLink: FC<TopLinkProps> = ({ serviceId, links }) => {
         </a>
       ))}
       <a
-        href={`/dashboard/${serviceId}`}
+        href={dashboardUrl}
         target="_blank"
         class="text-gray-400 hover:text-gray-600 flex items-center"
       >

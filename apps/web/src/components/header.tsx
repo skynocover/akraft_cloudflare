@@ -1,31 +1,30 @@
 import { Link } from "@tanstack/react-router";
-import { ModeToggle } from "./mode-toggle";
+import { Github } from "lucide-react";
+import { Button } from "./ui/button";
 import UserMenu from "./user-menu";
 
 export default function Header() {
-	const links = [
-		{ to: "/", label: "Home" },
-		{ to: "/dashboard", label: "Dashboard" },
-	] as const;
-
 	return (
-		<div>
-			<div className="flex flex-row items-center justify-between px-2 py-1">
-				<nav className="flex gap-4 text-lg">
-					{links.map(({ to, label }) => {
-						return (
-							<Link key={to} to={to}>
-								{label}
-							</Link>
-						);
-					})}
-				</nav>
-				<div className="flex items-center gap-2">
-					<ModeToggle />
-					<UserMenu />
-				</div>
-			</div>
-			<hr />
+		<div className="flex items-center justify-between py-4 px-4 border-b">
+			<Link to="/">
+				<Button variant="link" className="text-2xl font-bold p-0">
+					Akraft
+				</Button>
+			</Link>
+			<nav className="flex items-center space-x-2">
+				<Button variant="ghost">About</Button>
+				<Button variant="outline" size="icon" asChild>
+					<a
+						href="https://github.com/skynocover/akraft"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<Github className="h-[1.2rem] w-[1.2rem]" />
+						<span className="sr-only">GitHub</span>
+					</a>
+				</Button>
+				<UserMenu />
+			</nav>
 		</div>
 	);
 }

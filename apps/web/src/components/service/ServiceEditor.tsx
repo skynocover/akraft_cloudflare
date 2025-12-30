@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Trash2, Save, X } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   AlertDialog,
@@ -20,27 +20,44 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import LoadingOverlay from "./LoadingOverlay";
+import { client } from "@/utils/orpc";
 
-// Import mock data (will be replaced with ORPC calls later)
-import {
-  updateMockService,
-  deleteMockService,
-  type Service,
-  type LinkItem,
-} from "@/mock/data";
+interface LinkItem {
+  name: string;
+  url: string;
+}
+
+interface Service {
+  id: string;
+  name: string;
+  description: string;
+  ownerId: string;
+  topLinks: LinkItem[];
+  headLinks: LinkItem[];
+  forbidContents: string[];
+  blockedIPs: string[];
+  auth: Record<string, string>;
+}
 
 interface ServiceEditorProps {
   service: Service;
   serviceId: string;
+  onUpdate?: () => void;
 }
 
 const ServiceEditor: React.FC<ServiceEditorProps> = ({
   service,
   serviceId,
+  onUpdate,
 }) => {
   const navigate = useNavigate();
   const [editedService, setEditedService] = useState<Service>(service);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Update local state when service prop changes
+  useEffect(() => {
+    setEditedService(service);
+  }, [service]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -50,7 +67,7 @@ const ServiceEditor: React.FC<ServiceEditorProps> = ({
   };
 
   const handleLinkChange = (links: LinkItem[], key: keyof Service) => {
-    setEditedService({ ...editedService, [key]: links });
+    setEditedService({ ...editedService, [key]: links } as Service);
   };
 
   const handleForbidContentsChange = (contents: string[]) => {
@@ -64,14 +81,18 @@ const ServiceEditor: React.FC<ServiceEditorProps> = ({
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      const serviceToSave: Service = {
-        ...editedService,
+      await client.admin.updateService({
+        serviceId,
+        name: editedService.name,
+        description: editedService.description,
+        topLinks: editedService.topLinks,
+        headLinks: editedService.headLinks,
         forbidContents: editedService.forbidContents?.filter((item) => !!item),
         blockedIPs: editedService.blockedIPs?.filter((ip) => validateIP(ip)),
-      };
-      // Mock: Replace with ORPC call later
-      updateMockService(serviceId, serviceToSave);
+        auth: editedService.auth,
+      });
       toast.success("Service saved successfully");
+      onUpdate?.();
     } catch (error) {
       console.error("Error saving service:", error);
       toast.error("Failed to save service");
@@ -83,8 +104,7 @@ const ServiceEditor: React.FC<ServiceEditorProps> = ({
   const handleDelete = async () => {
     setIsLoading(true);
     try {
-      // Mock: Replace with ORPC call later
-      deleteMockService(serviceId);
+      await client.admin.deleteService({ serviceId });
       toast.success("Service deleted successfully");
       navigate({ to: "/dashboard" });
     } catch (error) {
@@ -98,18 +118,15 @@ const ServiceEditor: React.FC<ServiceEditorProps> = ({
   return (
     <LoadingOverlay isLoading={isLoading}>
       <Card className="w-full">
-        <CardHeader>
-          <CardTitle>
-            <Input
-              name="name"
-              value={editedService.name || ""}
-              onChange={handleInputChange}
-              placeholder="Service Name"
-              className="text-2xl font-bold"
-            />
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="pt-6 space-y-4">
+          <Input
+            name="name"
+            value={editedService.name || ""}
+            onChange={handleInputChange}
+            placeholder="Service Name"
+            className="text-xl font-bold bg-muted"
+          />
+
           <Textarea
             name="description"
             value={editedService.description || ""}
@@ -127,78 +144,54 @@ const ServiceEditor: React.FC<ServiceEditorProps> = ({
               <TabsTrigger value="auth">Auth</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="topLinks">
-              <Card>
-                <CardContent className="pt-6">
-                  <LinkEditor
-                    links={editedService.topLinks || []}
-                    onLinksChange={(links) =>
-                      handleLinkChange(links, "topLinks")
-                    }
-                  />
-                </CardContent>
-              </Card>
+            <TabsContent value="topLinks" className="pt-4">
+              <LinkEditor
+                links={editedService.topLinks || []}
+                onLinksChange={(links) => handleLinkChange(links, "topLinks")}
+              />
             </TabsContent>
 
-            <TabsContent value="headLinks">
-              <Card>
-                <CardContent className="pt-6">
-                  <LinkEditor
-                    links={editedService.headLinks || []}
-                    onLinksChange={(links) =>
-                      handleLinkChange(links, "headLinks")
-                    }
-                  />
-                </CardContent>
-              </Card>
+            <TabsContent value="headLinks" className="pt-4">
+              <LinkEditor
+                links={editedService.headLinks || []}
+                onLinksChange={(links) => handleLinkChange(links, "headLinks")}
+              />
             </TabsContent>
 
-            <TabsContent value="forbidContents">
-              <Card>
-                <CardContent className="pt-6">
-                  <ForbidContentsEditor
-                    contents={editedService.forbidContents || []}
-                    onContentsChange={handleForbidContentsChange}
-                  />
-                </CardContent>
-              </Card>
+            <TabsContent value="forbidContents" className="pt-4">
+              <ForbidContentsEditor
+                contents={editedService.forbidContents || []}
+                onContentsChange={handleForbidContentsChange}
+              />
             </TabsContent>
 
-            <TabsContent value="blockedIPs">
-              <Card>
-                <CardContent className="pt-6">
-                  <BlockedIPsEditor
-                    ips={editedService.blockedIPs || []}
-                    onIPsChange={handleBlockedIPsChange}
-                  />
-                </CardContent>
-              </Card>
+            <TabsContent value="blockedIPs" className="pt-4">
+              <BlockedIPsEditor
+                ips={editedService.blockedIPs || []}
+                onIPsChange={handleBlockedIPsChange}
+              />
             </TabsContent>
 
-            <TabsContent value="auth">
-              <Card>
-                <CardContent className="pt-6">
-                  <Textarea
-                    name="auth"
-                    value={JSON.stringify(editedService.auth, null, 2) || ""}
-                    onChange={(e) => {
-                      try {
-                        setEditedService({
-                          ...editedService,
-                          auth: JSON.parse(e.target.value),
-                        });
-                      } catch {
-                        // Invalid JSON, don't update
-                      }
-                    }}
-                    className="min-h-[200px] font-mono text-sm"
-                  />
-                </CardContent>
-              </Card>
+            <TabsContent value="auth" className="pt-4">
+              <Textarea
+                name="auth"
+                value={JSON.stringify(editedService.auth, null, 2) || ""}
+                onChange={(e) => {
+                  try {
+                    setEditedService({
+                      ...editedService,
+                      auth: JSON.parse(e.target.value),
+                    });
+                  } catch {
+                    // Invalid JSON, don't update
+                  }
+                }}
+                className="min-h-[200px] font-mono text-sm"
+              />
             </TabsContent>
           </Tabs>
 
-          <div className="flex justify-between items-center mt-8">
+          <div className="flex justify-between items-center pt-4">
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" size="icon">
@@ -240,6 +233,11 @@ interface LinkEditorProps {
 
 const LinkEditor: React.FC<LinkEditorProps> = ({ links, onLinksChange }) => {
   const [localLinks, setLocalLinks] = useState<LinkItem[]>(links);
+
+  // Sync with parent when links prop changes
+  useEffect(() => {
+    setLocalLinks(links);
+  }, [links]);
 
   const handleLinkChange = (
     index: number,
@@ -307,6 +305,10 @@ const ForbidContentsEditor: React.FC<ForbidContentsEditorProps> = ({
 }) => {
   const [localContents, setLocalContents] = useState<string[]>(contents);
 
+  useEffect(() => {
+    setLocalContents(contents);
+  }, [contents]);
+
   const handleContentChange = (index: number, value: string) => {
     const newContents = [...localContents];
     newContents[index] = value;
@@ -362,6 +364,10 @@ const BlockedIPsEditor: React.FC<BlockedIPsEditorProps> = ({
   onIPsChange,
 }) => {
   const [localIPs, setLocalIPs] = useState<string[]>(ips);
+
+  useEffect(() => {
+    setLocalIPs(ips);
+  }, [ips]);
 
   const handleIPChange = (index: number, value: string) => {
     const newIPs = [...localIPs];

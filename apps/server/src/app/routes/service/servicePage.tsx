@@ -13,6 +13,7 @@ interface ServicePageProps {
   service: Service | null;
   threads: ThreadWithReplies[];
   totalPages: number;
+  adminUrl?: string;
 }
 
 export const ServicePage: FC<ServicePageProps> = ({
@@ -21,6 +22,7 @@ export const ServicePage: FC<ServicePageProps> = ({
   service,
   threads,
   totalPages,
+  adminUrl,
 }) => {
   if (!service) {
     return (
@@ -43,7 +45,7 @@ export const ServicePage: FC<ServicePageProps> = ({
   return (
     <Layout title={service.name}>
       <div class="container mx-auto p-6 max-w-6xl relative">
-        <TopLink links={service.topLinks || []} serviceId={serviceId} />
+        <TopLink links={service.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} />
         <Title title={service.name || ""} links={service.headLinks || []} />
 
         <PostCard
