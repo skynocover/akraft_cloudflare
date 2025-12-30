@@ -36,6 +36,15 @@ akraft-cloudflare/
     └── config/              # Shared TypeScript configs
 ```
 
+### Detailed Documentation
+
+各 app 有獨立的 CLAUDE.md 提供更詳細的實作規範：
+
+| 檔案 | 內容 |
+|------|------|
+| `apps/server/CLAUDE.md` | HonoX 元件規範、R2 上傳、Content Safety、API 端點 |
+| `apps/web/CLAUDE.md` | TanStack Router 路由、ORPC 使用、Better-Auth 客戶端 |
+
 ### Application Domains
 
 This project has **two distinct frontend experiences**:
@@ -90,10 +99,18 @@ Required environment variables are typed in `apps/server/env.d.ts`:
 
 ```typescript
 export type CloudflareEnv = {
-  CORS_ORIGIN: string;
-  BETTER_AUTH_SECRET: string;
-  BETTER_AUTH_URL: string;
-  DB: D1Database;  // Cloudflare D1 binding
+  // Core
+  CORS_ORIGIN: string;              // Admin dashboard URL (e.g., http://localhost:3001)
+  BETTER_AUTH_SECRET: string;       // Auth secret key
+  BETTER_AUTH_URL: string;          // Auth server URL
+  DB: D1Database;                   // Cloudflare D1 binding
+
+  // File Storage
+  R2: R2Bucket;                     // Cloudflare R2 bucket for images
+
+  // Content Safety (Optional)
+  CONTENT_SAFETY_ENDPOINT?: string; // Azure Content Safety endpoint
+  CONTENT_SAFETY_API_KEY?: string;  // Azure Content Safety API key
 };
 ```
 
@@ -105,6 +122,27 @@ Set these in `.env` files for local development. For production, configure them 
 - Database uses Cloudflare D1 (SQLite-compatible)
 - Import from `cloudflare:workers` to access `env` bindings
 - File system APIs (like HonoX's `createApp()` with glob) won't work - use manual routing instead
+
+### R2 File Storage
+
+圖片儲存在 Cloudflare R2 bucket (`akraft-images`)，透過 `/api/images/:imageToken` 提供服務。
+
+- 支援格式：JPEG, PNG, GIF, WebP
+- 大小限制：5MB
+- 詳細實作：參見 `apps/server/CLAUDE.md`
+
+### Content Safety & Moderation
+
+發文時的內容審核機制：
+
+| 功能 | 說明 |
+|------|------|
+| IP 封鎖 | 支援精確匹配、前綴、CIDR |
+| 禁止詞過濾 | 檢查標題和內容 |
+| 頻率限制 | 每 IP 每分鐘 10 次 |
+| Azure Content Safety | 檢測有害內容（可選） |
+
+- 詳細實作：參見 `apps/server/CLAUDE.md`
 
 ### Adding New API Procedures
 
@@ -186,6 +224,42 @@ This project uses **pnpm** with workspaces. The catalog feature in `pnpm-workspa
   - Includes reply form for authenticated users
 
 **Important:** Register these routes manually in `apps/server/src/index.ts` (HonoX's auto-routing doesn't work in Workers)
+
+### Public API Endpoints
+
+**Forum API** (defined in `apps/server/src/index.ts`):
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/service/:serviceId` | Service page (SSR) - thread list |
+| GET | `/service/:serviceId/:threadId` | Thread page (SSR) - thread with replies |
+| POST | `/api/service/:serviceId/thread` | Create new thread |
+| POST | `/api/service/:serviceId/reply` | Create reply to thread |
+| POST | `/api/service/:serviceId/report` | Report thread or reply |
+| GET | `/api/images/:imageToken` | Serve image from R2 |
+
+**Thread Creation** (`POST /api/service/:serviceId/thread`):
+- Form fields: `title`, `name`, `content`, `youtubeLink`, `image` (file)
+- Moderation: IP check, forbidden words, rate limit
+- Content safety: Azure API (if configured)
+- Returns: Redirect to service page
+
+**Reply Creation** (`POST /api/service/:serviceId/reply`):
+- Form fields: `threadId`, `name`, `content`, `youtubeLink`, `sage`, `image` (file)
+- Same moderation and content safety checks
+- Returns: Redirect to thread page
+
+**Report Creation** (`POST /api/service/:serviceId/report`):
+- Form fields: `threadId`, `replyId`, `content`, `reportedIp`
+- Returns: Redirect to referer or service page
+
+**Admin API** (defined in `packages/api/routers/admin.ts`):
+- All endpoints require authentication + owner check
+- `getReports(serviceId)` - Get reports for service
+- `deleteReports(reportIds)` - Delete reports
+- `deleteThread(threadId)` - Delete thread
+- `deleteReply(replyId)` - Delete reply
+- `updateService(serviceId, data)` - Update service settings
 
 ### Implementation Guidelines
 
