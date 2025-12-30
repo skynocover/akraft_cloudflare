@@ -33,7 +33,7 @@ service為各種版面（對應 Better Auth 的 organization）
 
 | 階段 | 名稱 | 目標 | 狀態 |
 |------|------|------|------|
-| 1 | 環境準備 | 安裝所有 shadcn 元件、設定 Tailwind | 待開始 |
+| 1 | 環境準備 | 安裝所有 shadcn 元件、設定 Tailwind | ✅ 完成 |
 | 2 | Mock 畫面 - 公開論壇 | HonoX SSR 頁面（假資料） | 待開始 |
 | 3 | Mock 畫面 - 管理後台 | React SPA 管理頁面（假資料） | 待開始 |
 | 4 | 資料庫 Schema | threads, replies, reports 表結構 | 待開始 |
@@ -50,32 +50,33 @@ service為各種版面（對應 Better Auth 的 organization）
 
 ### 1.1 apps/server (HonoX) shadcn 元件
 安裝以下元件：
-- [ ] Card
-- [ ] Button
-- [ ] Separator
-- [ ] Input
-- [ ] Textarea
-- [ ] Tabs
-- [ ] Alert
-- [ ] Checkbox
-- [ ] Dialog（用於回覆彈窗）
+- [x] Card
+- [x] Button
+- [x] Separator
+- [x] Input
+- [x] Textarea
+- [x] Tabs
+- [x] Alert
+- [x] Checkbox
+- [x] Dialog（用於回覆彈窗）
 
 ### 1.2 apps/web (React SPA) shadcn 元件
 安裝以下元件：
-- [ ] Card
-- [ ] Button
-- [ ] Input
-- [ ] Textarea
-- [ ] Tabs
-- [ ] Table
-- [ ] Checkbox
-- [ ] Tooltip
-- [ ] AlertDialog
-- [ ] Sonner/Toast
+- [x] Card
+- [x] Button
+- [x] Input
+- [x] Textarea
+- [x] Tabs
+- [x] Table
+- [x] Checkbox
+- [x] Tooltip
+- [x] AlertDialog
+- [x] Sonner/Toast
 
 ### 1.3 共用設定
-- [ ] 確認 Tailwind CSS 設定正確
-- [ ] 設定共用的 CSS 變數（如需要）
+- [x] 確認 Tailwind CSS 設定正確
+- [x] 設定共用的 CSS 變數（Layout 元件）
+- [x] 建立 apps/server Layout 元件（含 Tailwind CDN）
 
 ---
 
