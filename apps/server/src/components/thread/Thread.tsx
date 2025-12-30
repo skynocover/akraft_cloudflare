@@ -87,7 +87,7 @@ export const Thread: FC<ThreadComponentProps> = ({
       <CardContent class="pt-3">
         <PostComponent
           content={thread.content || ""}
-          imageURL={thread.image || thread.imageToken}
+          imageURL={thread.image}
           youtubeID={thread.youtubeID}
         />
       </CardContent>
@@ -135,7 +135,7 @@ export const Thread: FC<ThreadComponentProps> = ({
                       />
                       <div class="mt-2">
                         <PostComponent
-                          imageURL={reply.image || reply.imageToken}
+                          imageURL={reply.image}
                           content={reply.content || ""}
                           youtubeID={reply.youtubeID}
                         />
@@ -165,7 +165,7 @@ export const Thread: FC<ThreadComponentProps> = ({
                   />
                   <div class="mt-2">
                     <PostComponent
-                      imageURL={reply.image || reply.imageToken}
+                      imageURL={reply.image}
                       content={reply.content || ""}
                       youtubeID={reply.youtubeID}
                     />

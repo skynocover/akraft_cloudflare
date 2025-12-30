@@ -39,8 +39,8 @@ service為各種版面（對應 Better Auth 的 organization）
 | 4 | 資料庫 Schema | threads, replies, reports 表結構 | ✅ 完成 |
 | 5 | 整合 - 公開論壇 | HonoX 直接查詢 DB | ✅ 完成 |
 | 6 | 整合 - 管理後台 | API + 權限控制 | ✅ 完成 |
-| 7 | 檔案上傳 | R2 整合 | 待開始 |
-| 8 | 進階功能 | 內容審核、IP封鎖等 | 待開始 |
+| 7 | 檔案上傳 | R2 整合 | ✅ 完成 |
+| 8 | 進階功能 | 內容審核、IP封鎖等 | ✅ 完成 |
 
 ---
 
@@ -265,12 +265,19 @@ reports 表:
 **目標**: 整合 Cloudflare R2 實現圖片上傳
 
 ### 7.1 R2 設定
-- [ ] 設定 R2 bucket（wrangler.jsonc）
-- [ ] 建立上傳 API endpoint
+- [x] 設定 R2 bucket（wrangler.jsonc）
+- [x] 建立上傳 API endpoint
+- [x] 建立圖片服務 API endpoint（/api/images/:imageToken）
 
 ### 7.2 整合到元件
-- [ ] PostCard 圖片上傳
-- [ ] 圖片顯示使用 R2 URL
+- [x] PostCard 圖片上傳（thread 和 reply 都支援）
+- [x] 圖片顯示使用 R2 URL（透過 /api/images/:imageToken）
+
+### 實作細節
+- R2 bucket 名稱：akraft-images
+- 圖片上傳大小限制：5MB
+- 支援格式：JPEG, PNG, GIF, WebP
+- 圖片存放路徑：images/{imageToken}.{ext}
 
 ---
 
@@ -279,12 +286,19 @@ reports 表:
 **目標**: 實作內容審核和安全功能
 
 ### 8.1 內容安全
-- [ ] NSFW 圖片檢測（Azure Content Safety 或替代）
+- [x] NSFW 圖片/文字檢測（Azure Content Safety API）
+- [x] 環境變數：CONTENT_SAFETY_ENDPOINT, CONTENT_SAFETY_API_KEY
 
 ### 8.2 安全功能
-- [ ] IP 封鎖功能
-- [ ] 禁止詞過濾
-- [ ] 發文頻率限制
+- [x] IP 封鎖功能（支援精確匹配、前綴匹配、CIDR）
+- [x] 禁止詞過濾（標題和內容）
+- [x] 發文頻率限制（10 posts/分鐘/IP）
+
+### 實作細節
+- 內容安全 API：Azure Content Safety (檢測 Hate, SelfHarm, Sexual, Violence)
+- 嚴重性閾值：2（0=安全，6=最嚴重）
+- Fail-open 策略：API 失敗時允許內容通過
+- IP 封鎖格式：精確 IP、前綴（如 192.168.）、CIDR（如 192.168.0.0/24）
 
 ---
 

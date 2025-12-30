@@ -21,6 +21,12 @@ function parseJsonField<T>(value: string | null | undefined, defaultValue: T): T
   }
 }
 
+// Convert imageToken to full image URL
+function getImageUrl(imageToken: string | null | undefined): string | undefined {
+  if (!imageToken) return undefined;
+  return `/api/images/${imageToken}`;
+}
+
 // Get service by ID
 export async function getService(
   db: DbInstance,
@@ -90,6 +96,7 @@ export async function getThreads(
         userId: reply.userId || undefined,
         userIp: reply.userIp || undefined,
         imageToken: reply.imageToken || undefined,
+        image: getImageUrl(reply.imageToken),
         youtubeID: reply.youtubeId || undefined,
         sage: reply.sage || false,
         createdAt: new Date(reply.createdAt),
@@ -104,6 +111,7 @@ export async function getThreads(
         userId: thread.userId || undefined,
         userIp: thread.userIp || undefined,
         imageToken: thread.imageToken || undefined,
+        image: getImageUrl(thread.imageToken),
         youtubeID: thread.youtubeId || undefined,
         replyAt: new Date(thread.replyAt),
         createdAt: new Date(thread.createdAt),
@@ -148,6 +156,7 @@ export async function getThread(
     userId: reply.userId || undefined,
     userIp: reply.userIp || undefined,
     imageToken: reply.imageToken || undefined,
+    image: getImageUrl(reply.imageToken),
     youtubeID: reply.youtubeId || undefined,
     sage: reply.sage || false,
     createdAt: new Date(reply.createdAt),
@@ -162,6 +171,7 @@ export async function getThread(
     userId: thread.userId || undefined,
     userIp: thread.userIp || undefined,
     imageToken: thread.imageToken || undefined,
+    image: getImageUrl(thread.imageToken),
     youtubeID: thread.youtubeId || undefined,
     replyAt: new Date(thread.replyAt),
     createdAt: new Date(thread.createdAt),

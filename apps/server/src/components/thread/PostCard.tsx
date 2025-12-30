@@ -175,7 +175,7 @@ export const PostCard: FC<PostCardProps> = ({
               <div class="flex items-center justify-center w-full h-24 border-2 border-dashed rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer">
                 <label class="flex flex-col items-center justify-center w-full h-full cursor-pointer">
                   <UploadIcon />
-                  <p class="text-xs text-gray-500">
+                  <p id={`${tabsId}-filename`} class="text-xs text-gray-500">
                     Click or drag to upload image
                   </p>
                   <input
@@ -183,6 +183,18 @@ export const PostCard: FC<PostCardProps> = ({
                     name="image"
                     class="hidden"
                     accept="image/*"
+                    onchange={`
+                      var label = document.getElementById('${tabsId}-filename');
+                      if (this.files && this.files[0]) {
+                        label.textContent = this.files[0].name;
+                        label.classList.remove('text-gray-500');
+                        label.classList.add('text-blue-600', 'font-medium');
+                      } else {
+                        label.textContent = 'Click or drag to upload image';
+                        label.classList.add('text-gray-500');
+                        label.classList.remove('text-blue-600', 'font-medium');
+                      }
+                    `}
                   />
                 </label>
               </div>

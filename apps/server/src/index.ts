@@ -24,6 +24,13 @@ import {
   generateId,
 } from './lib/db/queries';
 
+// R2 upload helper
+import { uploadImage } from './lib/r2/upload';
+
+// Safety & Moderation
+import { checkModeration } from './lib/safety/moderation';
+import { isContentSafetyEnabled, checkContentSafety } from './lib/safety/content-safety';
+
 const app = new Hono();
 
 app.use(logger());
@@ -126,6 +133,28 @@ app.get('/service/:serviceId/:threadId', async (c) => {
   return c.html(html as string);
 });
 
+// API: Serve images from R2
+app.get('/api/images/:imageToken', async (c) => {
+  const imageToken = c.req.param('imageToken');
+  const key = `images/${imageToken}`;
+
+  try {
+    const object = await env.R2.get(key);
+    if (!object) {
+      return c.text('Image not found', 404);
+    }
+
+    const headers = new Headers();
+    headers.set('Content-Type', object.httpMetadata?.contentType || 'image/jpeg');
+    headers.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+
+    return new Response(object.body, { headers });
+  } catch (error) {
+    console.error('Error serving image:', error);
+    return c.text('Error serving image', 500);
+  }
+});
+
 // API: Create new thread
 app.post('/api/service/:serviceId/thread', async (c) => {
   const serviceId = c.req.param('serviceId');
@@ -135,6 +164,7 @@ app.post('/api/service/:serviceId/thread', async (c) => {
   const name = formData.get('name') as string || 'Anonymous';
   const content = formData.get('content') as string;
   const youtubeLink = formData.get('youtubeLink') as string;
+  const imageFile = formData.get('image') as File | null;
 
   // Extract YouTube ID from URL
   let youtubeId: string | undefined;
@@ -151,8 +181,48 @@ app.post('/api/service/:serviceId/thread', async (c) => {
 
   const db = createDb(env.DB);
 
-  // TODO: Handle image upload to R2
-  const imageToken: string | undefined = undefined;
+  // Get service for moderation settings
+  const service = await getService(db, serviceId);
+  if (!service) {
+    return c.text('Service not found', 404);
+  }
+
+  // Check moderation (IP blocking, forbidden words, rate limiting)
+  const moderationResult = checkModeration(service, userIp, content, title);
+  if (!moderationResult.allowed) {
+    return c.text(moderationResult.reason || 'Content not allowed', 403);
+  }
+
+  // Check content safety (Azure Content Safety API)
+  let imageData: ArrayBuffer | undefined;
+  if (imageFile && imageFile.size > 0) {
+    imageData = await imageFile.arrayBuffer();
+  }
+
+  if (isContentSafetyEnabled(env.CONTENT_SAFETY_ENDPOINT, env.CONTENT_SAFETY_API_KEY)) {
+    const safetyResult = await checkContentSafety(
+      env.CONTENT_SAFETY_ENDPOINT!,
+      env.CONTENT_SAFETY_API_KEY!,
+      { text: `${title} ${content}`, imageData }
+    );
+
+    if (!safetyResult.safe) {
+      console.log('Content blocked by safety check:', safetyResult.blockedCategories);
+      return c.text(`Content blocked: ${safetyResult.blockedCategories.join(', ')}`, 403);
+    }
+  }
+
+  // Handle image upload to R2
+  let imageToken: string | undefined = undefined;
+  if (imageFile && imageFile.size > 0) {
+    const uploadResult = await uploadImage(env.R2, imageFile);
+    if (uploadResult.success) {
+      imageToken = uploadResult.imageToken;
+    } else {
+      console.error('Image upload failed:', uploadResult.error);
+      // Continue without image - don't fail the whole request
+    }
+  }
 
   try {
     await createThread(db, {
@@ -184,6 +254,7 @@ app.post('/api/service/:serviceId/reply', async (c) => {
   const content = formData.get('content') as string;
   const youtubeLink = formData.get('youtubeLink') as string;
   const sage = formData.get('sage') === 'on';
+  const imageFile = formData.get('image') as File | null;
 
   // Extract YouTube ID from URL
   let youtubeId: string | undefined;
@@ -206,8 +277,48 @@ app.post('/api/service/:serviceId/reply', async (c) => {
     return c.text('Invalid thread', 400);
   }
 
-  // TODO: Handle image upload to R2
-  const imageToken: string | undefined = undefined;
+  // Get service for moderation settings
+  const service = await getService(db, serviceId);
+  if (!service) {
+    return c.text('Service not found', 404);
+  }
+
+  // Check moderation (IP blocking, forbidden words, rate limiting)
+  const moderationResult = checkModeration(service, userIp, content);
+  if (!moderationResult.allowed) {
+    return c.text(moderationResult.reason || 'Content not allowed', 403);
+  }
+
+  // Check content safety (Azure Content Safety API)
+  let imageData: ArrayBuffer | undefined;
+  if (imageFile && imageFile.size > 0) {
+    imageData = await imageFile.arrayBuffer();
+  }
+
+  if (isContentSafetyEnabled(env.CONTENT_SAFETY_ENDPOINT, env.CONTENT_SAFETY_API_KEY)) {
+    const safetyResult = await checkContentSafety(
+      env.CONTENT_SAFETY_ENDPOINT!,
+      env.CONTENT_SAFETY_API_KEY!,
+      { text: content, imageData }
+    );
+
+    if (!safetyResult.safe) {
+      console.log('Content blocked by safety check:', safetyResult.blockedCategories);
+      return c.text(`Content blocked: ${safetyResult.blockedCategories.join(', ')}`, 403);
+    }
+  }
+
+  // Handle image upload to R2
+  let imageToken: string | undefined = undefined;
+  if (imageFile && imageFile.size > 0) {
+    const uploadResult = await uploadImage(env.R2, imageFile);
+    if (uploadResult.success) {
+      imageToken = uploadResult.imageToken;
+    } else {
+      console.error('Image upload failed:', uploadResult.error);
+      // Continue without image - don't fail the whole request
+    }
+  }
 
   try {
     await createReply(db, {
