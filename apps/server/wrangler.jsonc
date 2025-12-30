@@ -4,6 +4,13 @@
     "main": "src/index.ts",
     "compatibility_flags": ["nodejs_compat"],
     "observability": {
-    "enabled": true
-  }
-  }
+        "enabled": true
+    },
+    "d1_databases": [
+        {
+            "binding": "DB",
+            "database_name": "akraft-db",
+            "database_id": "local"
+        }
+    ]
+}

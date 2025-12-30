@@ -36,7 +36,7 @@ service為各種版面（對應 Better Auth 的 organization）
 | 1 | 環境準備 | 安裝所有 shadcn 元件、設定 Tailwind | ✅ 完成 |
 | 2 | Mock 畫面 - 公開論壇 | HonoX SSR 頁面（假資料） | ✅ 完成 |
 | 3 | Mock 畫面 - 管理後台 | React SPA 管理頁面（假資料） | ✅ 完成 |
-| 4 | 資料庫 Schema | threads, replies, reports 表結構 | 待開始 |
+| 4 | 資料庫 Schema | threads, replies, reports 表結構 | ✅ 完成 |
 | 5 | 整合 - 公開論壇 | HonoX 直接查詢 DB | 待開始 |
 | 6 | 整合 - 管理後台 | API + 權限控制 | 待開始 |
 | 7 | 檔案上傳 | R2 整合 | 待開始 |
@@ -156,45 +156,43 @@ service為各種版面（對應 Better Auth 的 organization）
 
 **目標**: 在 `packages/db` 中建立論壇相關表結構
 
-### 4.1 確認 Better Auth Organization 設定
-- [ ] 確認 organization 表結構（作為 service 使用）
-- [ ] 確認 organization 的欄位是否足夠（name, description 等）
-- [ ] 如需擴展，考慮額外欄位或 metadata
+資料需要參考xata-backup
+
+### 4.1 建立獨立 services 表（基於 xata-backup 結構）
+- [x] 建立 services 表（不使用 organization，因舊資料有額外欄位）
+- [x] 包含 auth, topLinks, headLinks, forbidContents, blockedIPs 等 JSON 欄位
 
 ### 4.2 建立論壇 Schema
 在 `packages/db/src/schema/forum.ts`:
 
 ```
+services 表:
+- id, name, description, ownerId
+- auth, topLinks, headLinks (JSON)
+- forbidContents, blockedIPs (JSON)
+- visible, createdAt, updatedAt
+
 threads 表:
-- id (primary key)
-- organizationId (foreign key → organization.id，即 serviceId)
-- title, name, content
+- id, serviceId, title, name, content
+- imageToken, youtubeId
 - userId, userIp
-- imageToken, youtubeID
-- replyAt (最後回覆時間)
-- createdAt
+- replyAt, createdAt
 
 replies 表:
-- id (primary key)
-- threadId (foreign key → threads.id)
-- name, content
-- userId, userIp
-- imageToken, youtubeID
-- sage (boolean)
+- id, threadId, name, content
+- imageToken, youtubeId
+- sage, userId, userIp
 - createdAt
 
 reports 表:
-- id (primary key)
-- organizationId (即 serviceId)
-- threadId (nullable)
-- replyId (nullable)
+- id, serviceId, threadId, replyId
 - content, userIp, reportedIp
 - createdAt
 ```
 
 ### 4.3 匯出 Schema
-- [ ] 在 `packages/db/src/schema/index.ts` 匯出
-- [ ] 執行 `pnpm run db:push` 建立表
+- [x] 在 `packages/db/src/schema/index.ts` 匯出
+- [x] 執行 `wrangler d1 execute` 建立本地表
 
 ---
 
