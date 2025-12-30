@@ -12,6 +12,7 @@
     "@akraft-cloudflare/api": "workspace:*",
     "@akraft-cloudflare/auth": "workspace:*",
     "@akraft-cloudflare/db": "workspace:*",
+    "drizzle-orm": "^0.45.1",
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",

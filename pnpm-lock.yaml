@@ -117,6 +117,9 @@ importers:
       dotenv:
         specifier: 'catalog:'
         version: 17.2.3
+      drizzle-orm:
+        specifier: ^0.45.1
+        version: 0.45.1(@cloudflare/workers-types@4.20251213.0)(@libsql/client@0.15.15)(kysely@0.28.9)
       hono:
         specifier: 'catalog:'
         version: 4.11.0
@@ -144,7 +147,7 @@ importers:
         version: 22.19.3
       alchemy:
         specifier: ^0.81.1
-        version: 0.81.2(@libsql/client@0.15.15)(vite@6.4.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))(workerd@1.20251210.0)(wrangler@4.54.0(@cloudflare/workers-types@4.20251213.0))
+        version: 0.81.2(@libsql/client@0.15.15)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20251213.0)(@libsql/client@0.15.15)(kysely@0.28.9))(vite@6.4.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))(workerd@1.20251210.0)(wrangler@4.54.0(@cloudflare/workers-types@4.20251213.0))
       tsdown:
         specifier: ^0.16.5
         version: 0.16.8(typescript@5.9.3)
@@ -7957,7 +7960,7 @@ snapshots:
 
   acorn@8.15.0: {}
 
-  alchemy@0.81.2(@libsql/client@0.15.15)(vite@6.4.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))(workerd@1.20251210.0)(wrangler@4.54.0(@cloudflare/workers-types@4.20251213.0)):
+  alchemy@0.81.2(@libsql/client@0.15.15)(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20251213.0)(@libsql/client@0.15.15)(kysely@0.28.9))(vite@6.4.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))(workerd@1.20251210.0)(wrangler@4.54.0(@cloudflare/workers-types@4.20251213.0)):
     dependencies:
       '@aws-sdk/credential-providers': 3.948.0
       '@cloudflare/unenv-preset': 2.7.7(unenv@2.0.0-rc.21)(workerd@1.20251210.0)
@@ -7990,6 +7993,7 @@ snapshots:
       yaml: 2.8.2
     optionalDependencies:
       '@libsql/client': 0.15.15
+      drizzle-orm: 0.45.1(@cloudflare/workers-types@4.20251213.0)(@libsql/client@0.15.15)(kysely@0.28.9)
       vite: 6.4.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2)
     transitivePeerDependencies:
       - aws-crt

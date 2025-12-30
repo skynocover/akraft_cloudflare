@@ -5,25 +5,32 @@ import { Title } from "../../../components/layout/Title";
 import { Pagination } from "../../../components/layout/Pagination";
 import { PostCard } from "../../../components/thread/PostCard";
 import { Thread } from "../../../components/thread/Thread";
-import { getMockService, getMockThreads } from "../../../mock/data";
+import type { Service, ThreadWithReplies } from "../../../types/forum";
 
 interface ServicePageProps {
   serviceId: string;
   page: number;
+  service: Service | null;
+  threads: ThreadWithReplies[];
+  totalPages: number;
 }
 
-export const ServicePage: FC<ServicePageProps> = ({ serviceId, page }) => {
-  const service = getMockService(serviceId);
-
+export const ServicePage: FC<ServicePageProps> = ({
+  serviceId,
+  page,
+  service,
+  threads,
+  totalPages,
+}) => {
   if (!service) {
     return (
-      <Layout title="找不到頁面">
+      <Layout title="Not Found">
         <div class="container mx-auto p-6 max-w-6xl">
           <div class="text-center py-20">
             <h1 class="text-4xl font-bold text-gray-800 mb-4">404</h1>
-            <p class="text-gray-600">找不到此討論區</p>
+            <p class="text-gray-600">Service not found</p>
             <a href="/" class="text-blue-500 hover:underline mt-4 inline-block">
-              返回首頁
+              Back to Home
             </a>
           </div>
         </div>
@@ -31,7 +38,6 @@ export const ServicePage: FC<ServicePageProps> = ({ serviceId, page }) => {
     );
   }
 
-  const { threads, totalPages } = getMockThreads(serviceId, page, 10);
   const baseUrl = `/service/${serviceId}`;
 
   return (
