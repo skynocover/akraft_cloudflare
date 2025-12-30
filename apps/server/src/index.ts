@@ -74,11 +74,29 @@ app.use('/*', async (c, next) => {
 // Import HonoX routes
 import helloApi from './app/routes/api/hello';
 import Home from './app/routes/index';
+import { ServicePage } from './app/routes/service/servicePage';
+import { ThreadPage } from './app/routes/service/threadPage';
 
 app.route('/api/hello', helloApi);
 
 app.get('/', (c) => {
   return c.html(Home());
+});
+
+// Service 頁面 - 顯示討論串列表
+app.get('/service/:serviceId', (c) => {
+  const serviceId = c.req.param('serviceId');
+  const page = parseInt(c.req.query('page') || '1', 10);
+  const html = ServicePage({ serviceId, page });
+  return c.html(html as string);
+});
+
+// Thread 頁面 - 顯示討論串詳情
+app.get('/service/:serviceId/:threadId', (c) => {
+  const serviceId = c.req.param('serviceId');
+  const threadId = c.req.param('threadId');
+  const html = ThreadPage({ serviceId, threadId });
+  return c.html(html as string);
 });
 
 export default app;

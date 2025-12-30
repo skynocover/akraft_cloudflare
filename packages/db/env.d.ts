@@ -1,9 +1,10 @@
-import { type server } from "../../apps/server/alchemy.run";
-
-// This file infers types for the cloudflare:workers environment from your Alchemy Worker.
-// @see https://alchemy.run/concepts/bindings/#type-safe-bindings
-
-export type CloudflareEnv = typeof server.Env;
+// Cloudflare Workers environment types
+export type CloudflareEnv = {
+  CORS_ORIGIN: string;
+  BETTER_AUTH_SECRET: string;
+  BETTER_AUTH_URL: string;
+  DB: D1Database;
+};
 
 declare global {
 	type Env = CloudflareEnv;

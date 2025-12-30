@@ -34,8 +34,8 @@ service為各種版面（對應 Better Auth 的 organization）
 | 階段 | 名稱 | 目標 | 狀態 |
 |------|------|------|------|
 | 1 | 環境準備 | 安裝所有 shadcn 元件、設定 Tailwind | ✅ 完成 |
-| 2 | Mock 畫面 - 公開論壇 | HonoX SSR 頁面（假資料） | 待開始 |
-| 3 | Mock 畫面 - 管理後台 | React SPA 管理頁面（假資料） | 待開始 |
+| 2 | Mock 畫面 - 公開論壇 | HonoX SSR 頁面（假資料） | ✅ 完成 |
+| 3 | Mock 畫面 - 管理後台 | React SPA 管理頁面（假資料） | ✅ 完成 |
 | 4 | 資料庫 Schema | threads, replies, reports 表結構 | 待開始 |
 | 5 | 整合 - 公開論壇 | HonoX 直接查詢 DB | 待開始 |
 | 6 | 整合 - 管理後台 | API + 權限控制 | 待開始 |
@@ -86,33 +86,44 @@ service為各種版面（對應 Better Auth 的 organization）
 
 ### 2.1 建立 Mock 資料
 在 `apps/server/src/mock/`:
-- [ ] `data.ts` - Mock service、threads、replies 資料
+- [x] `data.ts` - Mock service、threads、replies 資料
 
 ### 2.2 遷移元件到 apps/server
 從 `/src/components` 遷移（調整為 HonoX 相容）:
 
 **佈局元件** (`apps/server/src/components/layout/`)
-- [ ] `TopLink.tsx` - 頂部連結列
-- [ ] `Title.tsx` - 標題元件
-- [ ] `Pagination.tsx` - 分頁元件
+- [x] `TopLink.tsx` - 頂部連結列
+- [x] `Title.tsx` - 標題元件
+- [x] `Pagination.tsx` - 分頁元件
 
 **討論串元件** (`apps/server/src/components/thread/`)
-- [ ] `Thread.tsx` - 討論串元件（含回覆列表）
-- [ ] `Post.tsx` - 貼文內容（PostMeta, PostComponent, PostContent）
-- [ ] `PostCard.tsx` - 發文/回覆表單
-- [ ] `ReplyButton.tsx` - 回覆按鈕
-- [ ] `ReportButton.tsx` - 檢舉按鈕
+- [x] `Thread.tsx` - 討論串元件（含回覆列表）
+- [x] `Post.tsx` - 貼文內容（PostMeta, PostComponent, PostContent）
+- [x] `PostCard.tsx` - 發文/回覆表單
+- [x] `ReplyButton.tsx` - 回覆按鈕
+- [x] `ReportButton.tsx` - 檢舉按鈕
 
 ### 2.3 建立 HonoX 頁面路由
 手動註冊路由（保持原本結構）:
 
-- [ ] `/service/:serviceId` - Service 頁面
+- [x] `/service/:serviceId` - Service 頁面
   - 顯示討論串列表
   - 包含 TopLink, Title, PostCard, Pagination, Thread 元件
 
-- [ ] `/service/:serviceId/:threadId` - 討論串詳情頁
+- [x] `/service/:serviceId/:threadId` - 討論串詳情頁
   - 顯示完整討論串和所有回覆
   - 包含 TopLink, Title, Thread 元件
+
+### 修改 (已完成)
+
+- [x] placeholder 一律使用英文
+- [x] 回覆改用icon 跟舊版相同
+- [x] 上傳圖片貨貼上youtube連結使用tab切換 跟舊版相同
+- [x] thread title的最右邊 在No. 右側 應該有回報的按鈕 使用紅色旗幟 跟舊版相同
+- [x] 回覆按鈕按下應該是跳彈窗 跟舊版相同
+- [x] 點擊 threads title 右側的No.thread 應該是跳出回覆的彈窗 並且加上 >> No.thread 跟舊版相同
+- [x] 展開回覆不是直接跳一個新的頁面 而是展開 跟舊版相同
+- [x] mock 資料多放一點 這樣我才能測試換頁功能 (現在有 25+ 討論串可測試分頁)
 
 ---
 
@@ -122,19 +133,19 @@ service為各種版面（對應 Better Auth 的 organization）
 
 ### 3.1 建立 Mock 資料
 在 `apps/web/src/mock/`:
-- [ ] `data.ts` - Mock service、reports 資料
+- [x] `data.ts` - Mock service、reports 資料
 
 ### 3.2 遷移管理元件
 從 `/src/components/service` 遷移:
 
-- [ ] `ReportList.tsx` - 檢舉列表管理
-- [ ] `ServiceEditor.tsx` - Service 設定編輯器
-- [ ] `LoadingOverlay.tsx` - 載入遮罩
+- [x] `ReportList.tsx` - 檢舉列表管理
+- [x] `ServiceEditor.tsx` - Service 設定編輯器
+- [x] `LoadingOverlay.tsx` - 載入遮罩
 
 ### 3.3 建立管理頁面路由
 在 `apps/web/src/routes/`:
 
-- [ ] `/dashboard/:serviceId` - 管理後台主頁
+- [x] `/dashboard/:serviceId` - 管理後台主頁
   - ServiceEditor 元件
   - ReportList 元件
   - 權限檢查 UI (Mock)
