@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/d1";
 import { eq, desc, sql } from "drizzle-orm";
 import * as schema from "@akraft-cloudflare/db/schema";
-import type { Service, ThreadWithReplies, Reply } from "../../types/forum";
+import type { Organization, OrganizationMetadata, ThreadWithReplies, Reply } from "../../types/forum";
 
 // Create db instance from D1 binding
 export function createDb(d1: D1Database) {
@@ -33,8 +33,6 @@ interface ImageUrlOptions {
 }
 
 // Convert imageToken to full image URL
-// - Old format (Cloudflare Images): uses cloudflareImagesUrl
-// - New format (R2): uses r2PublicUrl if set, otherwise /api/images/:token
 function getImageUrl(
   imageToken: string | null | undefined,
   options?: ImageUrlOptions
@@ -46,13 +44,11 @@ function getImageUrl(
     if (options?.cloudflareImagesUrl) {
       return `${options.cloudflareImagesUrl}/${imageToken}/public`;
     }
-    // Fallback: return token as-is (shouldn't happen in production)
     return imageToken;
   }
 
   // New R2 format
   if (options?.r2PublicUrl) {
-    // Production: use R2 public URL
     return `${options.r2PublicUrl}/images/${imageToken}`;
   }
 
@@ -60,36 +56,39 @@ function getImageUrl(
   return `/api/images/${imageToken}`;
 }
 
-// Get service by ID
-export async function getService(
+// Get organization by ID (replaces getService)
+export async function getOrganization(
   db: DbInstance,
-  serviceId: string
-): Promise<Service | null> {
+  organizationId: string
+): Promise<Organization | null> {
   const result = await db
     .select()
-    .from(schema.services)
-    .where(eq(schema.services.id, serviceId))
+    .from(schema.organization)
+    .where(eq(schema.organization.id, organizationId))
     .limit(1);
 
   const row = result[0];
   if (!row) return null;
 
+  const metadata = parseJsonField<OrganizationMetadata>(row.metadata, {});
+
   return {
     id: row.id,
     name: row.name,
-    description: row.description || undefined,
-    ownerId: row.ownerId || "",
-    topLinks: parseJsonField(row.topLinks, []),
-    headLinks: parseJsonField(row.headLinks, []),
-    forbidContents: parseJsonField(row.forbidContents, []),
-    blockedIPs: parseJsonField(row.blockedIPs, []),
+    slug: row.slug || undefined,
+    logo: row.logo || undefined,
+    metadata,
+    createdAt: new Date(row.createdAt),
   };
 }
+
+// Alias for backward compatibility
+export const getService = getOrganization;
 
 // Get threads with pagination
 export async function getThreads(
   db: DbInstance,
-  serviceId: string,
+  organizationId: string,
   page: number = 1,
   pageSize: number = 10,
   imageUrlOptions?: ImageUrlOptions
@@ -98,7 +97,7 @@ export async function getThreads(
   const countResult = await db
     .select({ count: sql<number>`count(*)` })
     .from(schema.threads)
-    .where(eq(schema.threads.serviceId, serviceId));
+    .where(eq(schema.threads.organizationId, organizationId));
 
   const totalCount = countResult[0]?.count || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -108,7 +107,7 @@ export async function getThreads(
   const threadRows = await db
     .select()
     .from(schema.threads)
-    .where(eq(schema.threads.serviceId, serviceId))
+    .where(eq(schema.threads.organizationId, organizationId))
     .orderBy(desc(schema.threads.replyAt))
     .limit(pageSize)
     .offset(offset);
@@ -138,7 +137,7 @@ export async function getThreads(
 
       return {
         id: thread.id,
-        serviceId: thread.serviceId,
+        organizationId: thread.organizationId,
         title: thread.title,
         name: thread.name || "Anonymous",
         content: thread.content || "",
@@ -160,7 +159,7 @@ export async function getThreads(
 // Get single thread with all replies
 export async function getThread(
   db: DbInstance,
-  serviceId: string,
+  organizationId: string,
   threadId: string,
   imageUrlOptions?: ImageUrlOptions
 ): Promise<ThreadWithReplies | null> {
@@ -173,8 +172,8 @@ export async function getThread(
   const thread = threadRows[0];
   if (!thread) return null;
 
-  // Verify it belongs to the correct service
-  if (thread.serviceId !== serviceId) return null;
+  // Verify it belongs to the correct organization
+  if (thread.organizationId !== organizationId) return null;
 
   // Get all replies
   const replyRows = await db
@@ -191,7 +190,7 @@ export async function getThread(
     userId: reply.userId || undefined,
     userIp: reply.userIp || undefined,
     imageToken: reply.imageToken || undefined,
-    image: getImageUrl(reply.imageToken, r2PublicUrl),
+    image: getImageUrl(reply.imageToken, imageUrlOptions),
     youtubeID: reply.youtubeId || undefined,
     sage: reply.sage || false,
     createdAt: new Date(reply.createdAt),
@@ -199,14 +198,14 @@ export async function getThread(
 
   return {
     id: thread.id,
-    serviceId: thread.serviceId,
+    organizationId: thread.organizationId,
     title: thread.title,
     name: thread.name || "Anonymous",
     content: thread.content || "",
     userId: thread.userId || undefined,
     userIp: thread.userIp || undefined,
     imageToken: thread.imageToken || undefined,
-    image: getImageUrl(thread.imageToken, r2PublicUrl),
+    image: getImageUrl(thread.imageToken, imageUrlOptions),
     youtubeID: thread.youtubeId || undefined,
     replyAt: new Date(thread.replyAt),
     createdAt: new Date(thread.createdAt),
@@ -223,16 +222,13 @@ export function generateId(): string {
 
 // Generate consistent user ID from IP + date (same IP on same day = same ID)
 export async function generateUserIdFromIp(ip: string): Promise<string> {
-  // Get today's date in YYYY-MM-DD format (UTC)
   const today = new Date().toISOString().split('T')[0];
   const data = `${ip}-${today}`;
 
-  // Hash using Web Crypto API (available in Cloudflare Workers)
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);
   const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
 
-  // Convert to hex and take first 8 characters
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
@@ -243,7 +239,7 @@ export async function generateUserIdFromIp(ip: string): Promise<string> {
 export async function createThread(
   db: DbInstance,
   data: {
-    serviceId: string;
+    organizationId: string;
     title: string;
     name?: string;
     content: string;
@@ -258,7 +254,7 @@ export async function createThread(
 
   await db.insert(schema.threads).values({
     id,
-    serviceId: data.serviceId,
+    organizationId: data.organizationId,
     title: data.title,
     name: data.name || "Anonymous",
     content: data.content,
@@ -318,7 +314,7 @@ export async function createReply(
 export async function createReport(
   db: DbInstance,
   data: {
-    serviceId: string;
+    organizationId: string;
     threadId?: string;
     replyId?: string;
     content: string;
@@ -330,7 +326,7 @@ export async function createReport(
 
   await db.insert(schema.reports).values({
     id,
-    serviceId: data.serviceId,
+    organizationId: data.organizationId,
     threadId: data.threadId || null,
     replyId: data.replyId || null,
     content: data.content,
@@ -342,16 +338,19 @@ export async function createReport(
   return id;
 }
 
-// Get thread's serviceId (for validation)
-export async function getThreadServiceId(
+// Get thread's organizationId (for validation)
+export async function getThreadOrganizationId(
   db: DbInstance,
   threadId: string
 ): Promise<string | null> {
   const result = await db
-    .select({ serviceId: schema.threads.serviceId })
+    .select({ organizationId: schema.threads.organizationId })
     .from(schema.threads)
     .where(eq(schema.threads.id, threadId))
     .limit(1);
 
-  return result[0]?.serviceId || null;
+  return result[0]?.organizationId || null;
 }
+
+// Alias for backward compatibility
+export const getThreadServiceId = getThreadOrganizationId;

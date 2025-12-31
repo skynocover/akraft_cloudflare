@@ -5,16 +5,28 @@ export interface LinkItem {
   url: string;
 }
 
-export interface Service {
-  id: string;
-  name: string;
-  description?: string;
-  ownerId: string;
+// Organization metadata for forum-specific settings
+export interface OrganizationMetadata {
   topLinks?: LinkItem[];
   headLinks?: LinkItem[];
   forbidContents?: string[];
   blockedIPs?: string[];
+  auth?: Record<string, string>;
+  visible?: boolean;
 }
+
+// Organization (replaces Service)
+export interface Organization {
+  id: string;
+  name: string;
+  slug?: string;
+  logo?: string;
+  metadata?: OrganizationMetadata;
+  createdAt: Date;
+}
+
+// Alias for backward compatibility
+export type Service = Organization;
 
 export interface Reply {
   id: string;
@@ -32,7 +44,7 @@ export interface Reply {
 
 export interface Thread {
   id: string;
-  serviceId: string;
+  organizationId: string;
   title: string;
   name: string;
   content: string;
@@ -51,7 +63,7 @@ export interface ThreadWithReplies extends Thread {
 
 export interface Report {
   id: string;
-  serviceId: string;
+  organizationId: string;
   threadId?: string;
   replyId?: string;
   content: string;

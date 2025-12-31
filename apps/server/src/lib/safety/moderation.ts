@@ -5,7 +5,7 @@
  * - Rate limiting
  */
 
-import type { Service } from '../../types/forum';
+import type { Organization } from '../../types/forum';
 
 export interface ModerationResult {
   allowed: boolean;
@@ -135,22 +135,24 @@ export function cleanupRateLimits(): void {
 }
 
 /**
- * Combined moderation check for a service
+ * Combined moderation check for an organization
  */
 export function checkModeration(
-  service: Service,
+  organization: Organization,
   userIp: string,
   content: string,
   title?: string
 ): ModerationResult {
-  // Check IP blocking
-  const ipCheck = checkIPBlocked(userIp, service.blockedIPs);
+  // Check IP blocking (from organization metadata)
+  const blockedIPs = organization.metadata?.blockedIPs;
+  const ipCheck = checkIPBlocked(userIp, blockedIPs);
   if (!ipCheck.allowed) {
     return ipCheck;
   }
 
-  // Check forbidden content
-  const contentCheck = checkForbiddenContent(content, title, service.forbidContents);
+  // Check forbidden content (from organization metadata)
+  const forbidContents = organization.metadata?.forbidContents;
+  const contentCheck = checkForbiddenContent(content, title, forbidContents);
   if (!contentCheck.allowed) {
     return contentCheck;
   }

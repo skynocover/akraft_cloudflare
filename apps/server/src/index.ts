@@ -243,7 +243,7 @@ app.post('/api/service/:serviceId/thread', async (c) => {
 
   try {
     await createThread(db, {
-      serviceId,
+      organizationId: serviceId,
       title,
       name,
       content,
@@ -380,7 +380,7 @@ app.post('/api/service/:serviceId/report', async (c) => {
 
   try {
     await createReport(db, {
-      serviceId,
+      organizationId: serviceId,
       threadId,
       replyId,
       content,
