@@ -4,6 +4,9 @@ export type CloudflareEnv = {
   BETTER_AUTH_URL: string;
   DB: D1Database;
   R2: R2Bucket;
+  // Google OAuth
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
   // R2 public URL (for production, e.g., https://pub-xxx.r2.dev or custom domain)
   // If not set, uses /api/images/:imageToken endpoint
   R2_PUBLIC_URL?: string;

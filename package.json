@@ -14,7 +14,10 @@
     "dev:web": "turbo -F web dev",
     "dev:server": "turbo -F server dev",
     "db:push": "turbo -F @akraft-cloudflare/db db:push",
-    "db:generate": "turbo -F @akraft-cloudflare/db db:generate"
+    "db:generate": "turbo -F @akraft-cloudflare/db db:generate",
+    "db:migrate": "cd apps/server && pnpm wrangler d1 migrations apply akraft-db --local",
+    "db:migrate:prod": "cd apps/server && pnpm wrangler d1 migrations apply akraft-db --remote -e production",
+    "db:reset": "rm -rf apps/server/.wrangler/state/v3/d1 && pnpm db:migrate"
   },
   "dependencies": {
     "dotenv": "catalog:",

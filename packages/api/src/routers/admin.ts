@@ -1,9 +1,10 @@
 import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import { protectedProcedure } from "../index";
-import { db } from "@akraft-cloudflare/db";
+import { createDb } from "@akraft-cloudflare/db";
 import * as schema from "@akraft-cloudflare/db/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { env } from "cloudflare:workers";
 
 // Zod schemas for validation
 const linkItemSchema = z.object({
@@ -24,6 +25,7 @@ const serviceUpdateSchema = z.object({
 
 // Helper to check if user is service owner
 async function checkServiceOwner(userId: string, serviceId: string) {
+  const db = createDb(env.DB);
   const result = await db
     .select({ ownerId: schema.services.ownerId })
     .from(schema.services)
@@ -51,6 +53,7 @@ export const getService = protectedProcedure
     const userId = context.session.user.id;
     await checkServiceOwner(userId, input.serviceId);
 
+    const db = createDb(env.DB);
     const result = await db
       .select()
       .from(schema.services)
@@ -84,6 +87,7 @@ export const getReports = protectedProcedure
     const userId = context.session.user.id;
     await checkServiceOwner(userId, input.serviceId);
 
+    const db = createDb(env.DB);
     const reports = await db
       .select()
       .from(schema.reports)
@@ -149,6 +153,7 @@ export const deleteReports = protectedProcedure
     const userId = context.session.user.id;
     await checkServiceOwner(userId, input.serviceId);
 
+    const db = createDb(env.DB);
     for (const reportId of input.reportIds) {
       await db.delete(schema.reports).where(eq(schema.reports.id, reportId));
     }
@@ -168,6 +173,7 @@ export const deleteThread = protectedProcedure
     const userId = context.session.user.id;
     await checkServiceOwner(userId, input.serviceId);
 
+    const db = createDb(env.DB);
     // Verify thread belongs to service
     const thread = await db
       .select()
@@ -202,6 +208,7 @@ export const deleteReply = protectedProcedure
     const userId = context.session.user.id;
     await checkServiceOwner(userId, input.serviceId);
 
+    const db = createDb(env.DB);
     // Verify reply belongs to a thread in this service
     const reply = await db
       .select({
@@ -262,6 +269,7 @@ export const updateService = protectedProcedure
       updateData.blockedIPs = JSON.stringify(input.blockedIPs);
     if (input.auth !== undefined) updateData.auth = JSON.stringify(input.auth);
 
+    const db = createDb(env.DB);
     await db
       .update(schema.services)
       .set(updateData)
@@ -277,6 +285,7 @@ export const deleteService = protectedProcedure
     const userId = context.session.user.id;
     await checkServiceOwner(userId, input.serviceId);
 
+    const db = createDb(env.DB);
     await db
       .delete(schema.services)
       .where(eq(schema.services.id, input.serviceId));

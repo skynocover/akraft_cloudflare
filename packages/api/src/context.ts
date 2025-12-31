@@ -1,11 +1,13 @@
 import type { Context as HonoContext } from "hono";
-import { auth } from "@akraft-cloudflare/auth";
+import { createAuth } from "@akraft-cloudflare/auth";
+import { env } from "cloudflare:workers";
 
 export type CreateContextOptions = {
 	context: HonoContext;
 };
 
 export async function createContext({ context }: CreateContextOptions) {
+	const auth = createAuth(env);
 	const session = await auth.api.getSession({
 		headers: context.req.raw.headers,
 	});

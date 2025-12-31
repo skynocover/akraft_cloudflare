@@ -6,7 +6,7 @@ import { RPCHandler } from '@orpc/server/fetch';
 import { onError } from '@orpc/server';
 import { createContext } from '@akraft-cloudflare/api/context';
 import { appRouter } from '@akraft-cloudflare/api/routers/index';
-import { auth } from '@akraft-cloudflare/auth';
+import { createAuth } from '@akraft-cloudflare/auth';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
@@ -44,7 +44,10 @@ app.use(
   }),
 );
 
-app.on(['POST', 'GET'], '/api/auth/*', (c) => auth.handler(c.req.raw));
+app.on(['POST', 'GET'], '/api/auth/*', (c) => {
+  const auth = createAuth(env);
+  return auth.handler(c.req.raw);
+});
 
 export const apiHandler = new OpenAPIHandler(appRouter, {
   plugins: [
