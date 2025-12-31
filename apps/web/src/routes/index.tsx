@@ -1,9 +1,44 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { orpc } from "@/utils/orpc";
 import { useQuery } from "@tanstack/react-query";
+import { authClient } from "@/lib/auth-client";
+import { getStoredServiceId } from "@/components/service-switcher";
 
 export const Route = createFileRoute("/")({
 	component: HomeComponent,
+	beforeLoad: async () => {
+		// Check if user is logged in
+		const session = await authClient.getSession();
+		if (session.data) {
+			// User is logged in, redirect to their service
+			const orgsResult = await authClient.organization.list();
+			const organizations = orgsResult.data || [];
+
+			if (organizations.length > 0) {
+				// Try to get stored service ID
+				const storedId = getStoredServiceId();
+				let targetOrg = organizations.find((org) => org.id === storedId);
+
+				// Fallback to first organization
+				if (!targetOrg) {
+					targetOrg = organizations[0];
+				}
+
+				// Redirect to the target service
+				redirect({
+					to: "/dashboard/$serviceId",
+					params: { serviceId: targetOrg.id },
+					throw: true,
+				});
+			} else {
+				// No organizations - redirect to create page
+				redirect({
+					to: "/dashboard/create",
+					throw: true,
+				});
+			}
+		}
+	},
 });
 
 const TITLE_TEXT = `

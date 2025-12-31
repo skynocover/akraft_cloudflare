@@ -35,8 +35,73 @@ export const session = sqliteTable(
 		userId: text("user_id")
 			.notNull()
 			.references(() => user.id, { onDelete: "cascade" }),
+		// Organization plugin: active organization for this session
+		activeOrganizationId: text("active_organization_id"),
 	},
 	(table) => [index("session_userId_idx").on(table.userId)],
+);
+
+// Organization table (Better Auth organization plugin)
+export const organization = sqliteTable(
+	"organization",
+	{
+		id: text("id").primaryKey(),
+		name: text("name").notNull(),
+		slug: text("slug").unique(),
+		logo: text("logo"),
+		metadata: text("metadata"), // JSON string for extra data
+		createdAt: integer("created_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.notNull(),
+	},
+	(table) => [index("organization_slug_idx").on(table.slug)],
+);
+
+// Member table - links users to organizations with roles
+export const member = sqliteTable(
+	"member",
+	{
+		id: text("id").primaryKey(),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		organizationId: text("organization_id")
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		role: text("role").notNull().default("member"), // owner, admin, member
+		createdAt: integer("created_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.notNull(),
+	},
+	(table) => [
+		index("member_userId_idx").on(table.userId),
+		index("member_organizationId_idx").on(table.organizationId),
+	],
+);
+
+// Invitation table - pending invitations to organizations
+export const invitation = sqliteTable(
+	"invitation",
+	{
+		id: text("id").primaryKey(),
+		email: text("email").notNull(),
+		inviterId: text("inviter_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		organizationId: text("organization_id")
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		role: text("role").notNull().default("member"),
+		status: text("status").notNull().default("pending"), // pending, accepted, rejected, canceled
+		createdAt: integer("created_at", { mode: "timestamp_ms" })
+			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+			.notNull(),
+		expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+	},
+	(table) => [
+		index("invitation_email_idx").on(table.email),
+		index("invitation_organizationId_idx").on(table.organizationId),
+	],
 );
 
 export const account = sqliteTable(
@@ -90,6 +155,8 @@ export const verification = sqliteTable(
 export const userRelations = relations(user, ({ many }) => ({
 	sessions: many(session),
 	accounts: many(account),
+	members: many(member),
+	invitations: many(invitation),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -97,11 +164,42 @@ export const sessionRelations = relations(session, ({ one }) => ({
 		fields: [session.userId],
 		references: [user.id],
 	}),
+	activeOrganization: one(organization, {
+		fields: [session.activeOrganizationId],
+		references: [organization.id],
+	}),
 }));
 
 export const accountRelations = relations(account, ({ one }) => ({
 	user: one(user, {
 		fields: [account.userId],
 		references: [user.id],
+	}),
+}));
+
+export const organizationRelations = relations(organization, ({ many }) => ({
+	members: many(member),
+	invitations: many(invitation),
+}));
+
+export const memberRelations = relations(member, ({ one }) => ({
+	user: one(user, {
+		fields: [member.userId],
+		references: [user.id],
+	}),
+	organization: one(organization, {
+		fields: [member.organizationId],
+		references: [organization.id],
+	}),
+}));
+
+export const invitationRelations = relations(invitation, ({ one }) => ({
+	inviter: one(user, {
+		fields: [invitation.inviterId],
+		references: [user.id],
+	}),
+	organization: one(organization, {
+		fields: [invitation.organizationId],
+		references: [organization.id],
 	}),
 }));
