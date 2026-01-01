@@ -24,9 +24,9 @@
                 {
                     "binding": "DB",
                     "database_name": "akraft-db",
-                    "database_id": "68aadc45-682b-4ff0-bd0a-c868d4a5a709",
+                    "database_id": "80a40002-de49-45f5-96f8-57370ec40938",
                     "migrations_dir": "../../packages/db/src/migrations",
-                    "preview_database_id": "68aadc45-682b-4ff0-bd0a-c868d4a5a709"
+                    "preview_database_id": "80a40002-de49-45f5-96f8-57370ec40938"
                 }
             ],
             "r2_buckets": [
