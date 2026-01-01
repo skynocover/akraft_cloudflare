@@ -11,6 +11,8 @@ interface ThreadPageProps {
   service: Service | null;
   thread: ThreadWithReplies | null;
   adminUrl?: string;
+  user?: { name: string; email: string } | null;
+  isAdmin?: boolean;
 }
 
 export const ThreadPage: FC<ThreadPageProps> = ({
@@ -18,6 +20,8 @@ export const ThreadPage: FC<ThreadPageProps> = ({
   service,
   thread,
   adminUrl,
+  user,
+  isAdmin,
 }) => {
   if (!service || !thread) {
     return (
@@ -41,7 +45,7 @@ export const ThreadPage: FC<ThreadPageProps> = ({
   return (
     <Layout title={`${thread.title} - ${service.name}`}>
       <div class="container mx-auto p-6 max-w-6xl relative">
-        <TopLink links={service.metadata?.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} />
+        <TopLink links={service.metadata?.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} user={user} currentPath={`/service/${serviceId}/${thread.id}`} />
         <Title title={service.name || ""} links={service.metadata?.headLinks || []} />
 
         {/* Back link */}
@@ -59,6 +63,7 @@ export const ThreadPage: FC<ThreadPageProps> = ({
           serviceId={serviceId}
           thread={thread}
           isPreview={false}
+          isAdmin={isAdmin}
         />
 
         <Footer />

@@ -91,7 +91,9 @@ export const PostMeta: FC<{
   serviceId: string;
   serviceOwnerId?: string;
   reportedIp?: string;
-}> = ({ name, userId, createdAt, threadId, replyId, serviceId, serviceOwnerId, reportedIp }) => {
+  isAdmin?: boolean;
+  isAdminPoster?: boolean;
+}> = ({ name, userId, createdAt, threadId, replyId, serviceId, serviceOwnerId, reportedIp, isAdmin, isAdminPoster }) => {
   const displayId = replyId || threadId;
 
   return (
@@ -99,12 +101,17 @@ export const PostMeta: FC<{
       class="flex flex-wrap items-center gap-2 text-sm text-gray-500"
     >
       <span class="font-semibold text-gray-700">{name}</span>
-      {userId && (
+      {isAdminPoster ? (
         <span>
           ID:{" "}
-          <span
-            class={userId === "admin" ? "font-semibold text-purple-500" : ""}
-          >
+          <span class="font-bold text-red-500">
+            Admin
+          </span>
+        </span>
+      ) : userId && (
+        <span>
+          ID:{" "}
+          <span>
             {userId}
           </span>
         </span>
@@ -117,6 +124,7 @@ export const PostMeta: FC<{
             threadId={threadId}
             replyId={replyId}
             serviceOwnerId={serviceOwnerId || ""}
+            isAdmin={isAdmin}
           />
         )}
         <ReportButton

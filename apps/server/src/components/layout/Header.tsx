@@ -2,9 +2,14 @@ import type { FC } from "hono/jsx";
 
 interface HeaderProps {
   dashboardUrl?: string;
+  user?: { name: string; email: string } | null;
+  currentPath?: string;
 }
 
-export const Header: FC<HeaderProps> = ({ dashboardUrl }) => {
+export const Header: FC<HeaderProps> = ({ dashboardUrl, user, currentPath = "/" }) => {
+  const loginUrl = `/login?callbackURL=${encodeURIComponent(currentPath)}`;
+  const logoutUrl = `/logout?callbackURL=${encodeURIComponent(currentPath)}`;
+
   return (
     <header class="flex items-center justify-between py-4 px-4 border-b bg-background">
       {/* Left side - Logo */}
@@ -16,6 +21,26 @@ export const Header: FC<HeaderProps> = ({ dashboardUrl }) => {
 
       {/* Right side - Navigation */}
       <nav class="flex items-center space-x-2">
+        {/* Login/User - subtle style */}
+        {user ? (
+          <div class="flex items-center space-x-2">
+            <span class="text-xs text-muted-foreground">{user.name}</span>
+            <a
+              href={logoutUrl}
+              class="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Logout
+            </a>
+          </div>
+        ) : (
+          <a
+            href={loginUrl}
+            class="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Admin
+          </a>
+        )}
+
         {/* GitHub button */}
         <a
           href="https://github.com/skynocover/akraft_cloudflare"

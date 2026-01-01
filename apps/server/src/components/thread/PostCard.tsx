@@ -71,6 +71,7 @@ interface PostCardProps {
   isModal?: boolean;
   modalId?: string;
   initContent?: string;
+  isAdmin?: boolean;
 }
 
 export const PostCard: FC<PostCardProps> = ({
@@ -81,6 +82,7 @@ export const PostCard: FC<PostCardProps> = ({
   isModal = false,
   modalId,
   initContent = "",
+  isAdmin = false,
 }) => {
   const actionUrl = isReply
     ? `/api/service/${serviceId}/reply`
@@ -305,9 +307,12 @@ export const PostCard: FC<PostCardProps> = ({
             <Button
               id={`${formId}-submit`}
               type="submit"
-              class="flex-1 bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200"
+              class={`flex-1 transition-colors duration-200 ${isAdmin ? "bg-red-500 text-white hover:bg-red-600" : "bg-blue-500 text-white hover:bg-blue-600"}`}
             >
-              {isReply ? "Submit reply" : "Submit"}
+              {isAdmin
+                ? (isReply ? "Submit reply as Admin" : "Submit as Admin")
+                : (isReply ? "Submit reply" : "Submit")
+              }
             </Button>
             {isReply && (
               <label class="flex items-center space-x-2 text-sm">

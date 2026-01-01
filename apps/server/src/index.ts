@@ -100,8 +100,58 @@ import helloApi from './app/routes/api/hello';
 import { HomePage } from './app/routes/homePage';
 import { ServicePage } from './app/routes/service/servicePage';
 import { ThreadPage } from './app/routes/service/threadPage';
+import { LoginPage } from './app/routes/loginPage';
+
+// Helper to get current session and check if user is admin for an organization
+async function getSessionInfo(c: Parameters<Parameters<typeof app.get>[1]>[0], organizationId?: string) {
+  const auth = createAuth(env);
+  const session = await auth.api.getSession({
+    headers: c.req.raw.headers,
+  });
+
+  if (!session?.user) {
+    return { user: null, isAdmin: false };
+  }
+
+  // Check if user is admin/owner of the organization
+  let isAdmin = false;
+  if (organizationId) {
+    const db = createDb(env.DB);
+    const memberResult = await db.query.member.findFirst({
+      where: (member, { and, eq }) => and(
+        eq(member.userId, session.user.id),
+        eq(member.organizationId, organizationId)
+      ),
+    });
+    isAdmin = memberResult?.role === 'owner' || memberResult?.role === 'admin';
+  }
+
+  return { user: session.user, isAdmin };
+}
 
 app.route('/api/hello', helloApi);
+
+// Login page
+app.get('/login', async (c) => {
+  const callbackURL = c.req.query('callbackURL') || '/';
+  const error = c.req.query('error');
+  const mode = c.req.query('mode') === 'signup' ? 'signup' : 'signin';
+  const html = LoginPage({ callbackURL, error, mode });
+  return c.html(html as string);
+});
+
+// Logout
+app.get('/logout', async (c) => {
+  const callbackURL = c.req.query('callbackURL') || '/';
+  const auth = createAuth(env);
+
+  // Clear session by calling sign-out
+  const response = await auth.api.signOut({
+    headers: c.req.raw.headers,
+  });
+
+  return c.redirect(callbackURL);
+});
 
 // Home page - display all visible organizations with their latest threads
 app.get('/', async (c) => {
@@ -134,7 +184,10 @@ app.get('/service/:serviceId', async (c) => {
     ? await getThreads(db, serviceId, page, 10, imageUrlOptions)
     : { threads: [], totalPages: 0 };
 
-  const html = ServicePage({ serviceId, page, service, threads, totalPages, adminUrl });
+  // Get session info to check if user is admin
+  const { user, isAdmin } = await getSessionInfo(c, serviceId);
+
+  const html = ServicePage({ serviceId, page, service, threads, totalPages, adminUrl, user, isAdmin });
   return c.html(html as string);
 });
 
@@ -152,7 +205,10 @@ app.get('/service/:serviceId/:threadId', async (c) => {
   };
   const thread = await getThread(db, serviceId, threadId, imageUrlOptions);
 
-  const html = ThreadPage({ serviceId, service, thread, adminUrl });
+  // Get session info to check if user is admin
+  const { user, isAdmin } = await getSessionInfo(c, serviceId);
+
+  const html = ThreadPage({ serviceId, service, thread, adminUrl, user, isAdmin });
   return c.html(html as string);
 });
 
@@ -253,6 +309,9 @@ app.post('/api/service/:serviceId/thread', async (c) => {
     }
   }
 
+  // Check if user is admin
+  const { isAdmin } = await getSessionInfo(c, serviceId);
+
   try {
     await createThread(db, {
       organizationId: serviceId,
@@ -263,6 +322,7 @@ app.post('/api/service/:serviceId/thread', async (c) => {
       youtubeId,
       userId,
       userIp,
+      isAdmin,
     });
 
     // Redirect back to service page
@@ -355,6 +415,9 @@ app.post('/api/service/:serviceId/reply', async (c) => {
     }
   }
 
+  // Check if user is admin
+  const { isAdmin } = await getSessionInfo(c, serviceId);
+
   try {
     await createReply(db, {
       threadId,
@@ -365,6 +428,7 @@ app.post('/api/service/:serviceId/reply', async (c) => {
       sage,
       userId,
       userIp,
+      isAdmin,
     });
 
     // Redirect back to thread page

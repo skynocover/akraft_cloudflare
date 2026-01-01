@@ -23,12 +23,14 @@ interface ReplyButtonProps {
   serviceId: string;
   threadId: string;
   serviceOwnerId: string;
+  isAdmin?: boolean;
 }
 
 export const ReplyButton: FC<ReplyButtonProps> = ({
   serviceId,
   threadId,
   serviceOwnerId: _serviceOwnerId,
+  isAdmin,
 }) => {
   const modalId = `reply-modal-${threadId}`;
 
@@ -57,6 +59,7 @@ export const ReplyButton: FC<ReplyButtonProps> = ({
             isReply={true}
             isModal={true}
             modalId={modalId}
+            isAdmin={isAdmin}
           />
         </div>
       </div>
@@ -69,6 +72,7 @@ interface ReplyNoButtonProps {
   threadId: string;
   replyId?: string;
   serviceOwnerId: string;
+  isAdmin?: boolean;
 }
 
 export const ReplyNoButton: FC<ReplyNoButtonProps> = ({
@@ -76,6 +80,7 @@ export const ReplyNoButton: FC<ReplyNoButtonProps> = ({
   threadId,
   replyId,
   serviceOwnerId: _serviceOwnerId,
+  isAdmin,
 }) => {
   const targetId = replyId || threadId;
   const modalId = `reply-no-modal-${targetId}`;
@@ -105,6 +110,7 @@ export const ReplyNoButton: FC<ReplyNoButtonProps> = ({
             isModal={true}
             modalId={modalId}
             initContent={initContent}
+            isAdmin={isAdmin}
           />
         </div>
       </div>

@@ -41,6 +41,7 @@ export interface Reply {
   image?: string;
   youtubeID?: string;
   sage?: boolean;
+  isAdmin?: boolean;
   createdAt: Date;
 }
 
@@ -55,6 +56,7 @@ export interface Thread {
   imageToken?: string;
   image?: string;
   youtubeID?: string;
+  isAdmin?: boolean;
   replyAt: Date;
   createdAt: Date;
 }

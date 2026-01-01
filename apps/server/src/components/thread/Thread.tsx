@@ -35,6 +35,7 @@ interface ThreadComponentProps {
   thread: ThreadWithReplies;
   isPreview: boolean;
   serviceOwnerId?: string;
+  isAdmin?: boolean;
 }
 
 export const Thread: FC<ThreadComponentProps> = ({
@@ -42,6 +43,7 @@ export const Thread: FC<ThreadComponentProps> = ({
   isPreview,
   serviceId,
   serviceOwnerId,
+  isAdmin,
 }) => {
   const visibleRepliesNum = 5;
   const hiddenRepliesCount = Math.max(0, thread.replies.length - visibleRepliesNum);
@@ -71,6 +73,7 @@ export const Thread: FC<ThreadComponentProps> = ({
             serviceId={serviceId}
             threadId={thread.id}
             serviceOwnerId={serviceOwnerId || ""}
+            isAdmin={isAdmin}
           />
         </div>
 
@@ -81,6 +84,8 @@ export const Thread: FC<ThreadComponentProps> = ({
           threadId={thread.id}
           serviceId={serviceId}
           serviceOwnerId={serviceOwnerId}
+          isAdmin={isAdmin}
+          isAdminPoster={thread.isAdmin}
         />
       </CardHeader>
 
@@ -132,6 +137,8 @@ export const Thread: FC<ThreadComponentProps> = ({
                         replyId={reply.id}
                         serviceId={serviceId}
                         serviceOwnerId={serviceOwnerId}
+                        isAdmin={isAdmin}
+                        isAdminPoster={reply.isAdmin}
                       />
                       <div class="mt-2">
                         <PostComponent
@@ -163,6 +170,8 @@ export const Thread: FC<ThreadComponentProps> = ({
                       replyId={reply.id}
                       serviceId={serviceId}
                       serviceOwnerId={serviceOwnerId}
+                      isAdmin={isAdmin}
+                      isAdminPoster={reply.isAdmin}
                     />
                     <div class="mt-2">
                       <PostComponent
@@ -192,6 +201,8 @@ export const Thread: FC<ThreadComponentProps> = ({
                       replyId={reply.id}
                       serviceId={serviceId}
                       serviceOwnerId={serviceOwnerId}
+                      isAdmin={isAdmin}
+                      isAdminPoster={reply.isAdmin}
                     />
                     <div class="mt-2">
                       <PostComponent

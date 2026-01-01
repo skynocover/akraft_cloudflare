@@ -17,6 +17,7 @@ export const threads = sqliteTable(
     youtubeId: text("youtube_id"), // YouTube video ID
     userId: text("user_id"), // Short hash for anonymous identification
     userIp: text("user_ip"), // IP address (for moderation)
+    isAdmin: integer("is_admin", { mode: "boolean" }).default(false), // Posted by admin
     replyAt: integer("reply_at", { mode: "timestamp_ms" })
       .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
       .notNull(),
@@ -45,6 +46,7 @@ export const replies = sqliteTable(
     sage: integer("sage", { mode: "boolean" }).default(false), // Don't bump thread
     userId: text("user_id"), // Short hash for anonymous identification
     userIp: text("user_ip"), // IP address (for moderation)
+    isAdmin: integer("is_admin", { mode: "boolean" }).default(false), // Posted by admin
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
       .notNull(),

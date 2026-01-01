@@ -10,14 +10,15 @@ interface HomePageProps {
     threads: ThreadWithReplies[];
   }[];
   dashboardUrl?: string;
+  user?: { name: string; email: string } | null;
 }
 
-export const HomePage: FC<HomePageProps> = ({ organizations, dashboardUrl }) => {
+export const HomePage: FC<HomePageProps> = ({ organizations, dashboardUrl, user }) => {
   const hasOrganizations = organizations.length > 0;
 
   return (
     <Layout title="Akraft - Discussion Forum">
-      <Header dashboardUrl={dashboardUrl} />
+      <Header dashboardUrl={dashboardUrl} user={user} currentPath="/" />
 
       <main class="container mx-auto px-4 py-8 max-w-7xl">
         {/* Hero section */}

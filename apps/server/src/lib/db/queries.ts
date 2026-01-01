@@ -132,6 +132,7 @@ export async function getThreads(
         image: getImageUrl(reply.imageToken, imageUrlOptions),
         youtubeID: reply.youtubeId || undefined,
         sage: reply.sage || false,
+        isAdmin: reply.isAdmin || false,
         createdAt: new Date(reply.createdAt),
       }));
 
@@ -146,6 +147,7 @@ export async function getThreads(
         imageToken: thread.imageToken || undefined,
         image: getImageUrl(thread.imageToken, imageUrlOptions),
         youtubeID: thread.youtubeId || undefined,
+        isAdmin: thread.isAdmin || false,
         replyAt: new Date(thread.replyAt),
         createdAt: new Date(thread.createdAt),
         replies,
@@ -193,6 +195,7 @@ export async function getThread(
     image: getImageUrl(reply.imageToken, imageUrlOptions),
     youtubeID: reply.youtubeId || undefined,
     sage: reply.sage || false,
+    isAdmin: reply.isAdmin || false,
     createdAt: new Date(reply.createdAt),
   }));
 
@@ -207,6 +210,7 @@ export async function getThread(
     imageToken: thread.imageToken || undefined,
     image: getImageUrl(thread.imageToken, imageUrlOptions),
     youtubeID: thread.youtubeId || undefined,
+    isAdmin: thread.isAdmin || false,
     replyAt: new Date(thread.replyAt),
     createdAt: new Date(thread.createdAt),
     replies,
@@ -247,6 +251,7 @@ export async function createThread(
     youtubeId?: string;
     userId?: string;
     userIp?: string;
+    isAdmin?: boolean;
   }
 ): Promise<string> {
   const id = generateId();
@@ -262,6 +267,7 @@ export async function createThread(
     youtubeId: data.youtubeId || null,
     userId: data.userId || null,
     userIp: data.userIp || null,
+    isAdmin: data.isAdmin || false,
     replyAt: now,
     createdAt: now,
   });
@@ -281,6 +287,7 @@ export async function createReply(
     sage?: boolean;
     userId?: string;
     userIp?: string;
+    isAdmin?: boolean;
   }
 ): Promise<string> {
   const id = generateId();
@@ -296,6 +303,7 @@ export async function createReply(
     sage: data.sage || false,
     userId: data.userId || null,
     userIp: data.userIp || null,
+    isAdmin: data.isAdmin || false,
     createdAt: now,
   });
 

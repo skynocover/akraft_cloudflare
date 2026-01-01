@@ -5,6 +5,8 @@ interface TopLinkProps {
   serviceId: string;
   links: LinkItem[];
   adminUrl?: string;
+  user?: { name: string; email: string } | null;
+  currentPath?: string;
 }
 
 // 簡單的 External Link SVG Icon
@@ -27,14 +29,40 @@ const ExternalLinkIcon = () => (
   </svg>
 );
 
-export const TopLink: FC<TopLinkProps> = ({ serviceId, links, adminUrl }) => {
+export const TopLink: FC<TopLinkProps> = ({ serviceId, links, adminUrl, user, currentPath = "/" }) => {
   // Default to relative path if adminUrl not provided
   const dashboardUrl = adminUrl
     ? `${adminUrl}/dashboard/${serviceId}`
     : `/dashboard/${serviceId}`;
 
+  const loginUrl = `/login?callbackURL=${encodeURIComponent(currentPath)}`;
+  const logoutUrl = `/logout?callbackURL=${encodeURIComponent(currentPath)}`;
+
   return (
     <div class="absolute top-2 right-2 flex items-center space-x-2 text-xs">
+      {/* Login/Logout - subtle style */}
+      {user ? (
+        <>
+          <span class="text-gray-400">{user.name}</span>
+          <a
+            href={logoutUrl}
+            class="text-gray-400 hover:text-gray-600"
+          >
+            Logout
+          </a>
+          <span class="text-gray-300">|</span>
+        </>
+      ) : (
+        <>
+          <a
+            href={loginUrl}
+            class="text-gray-400 hover:text-gray-600"
+          >
+            Login
+          </a>
+          <span class="text-gray-300">|</span>
+        </>
+      )}
       {links.map((link, index) => (
         <a
           key={index}
@@ -51,7 +79,7 @@ export const TopLink: FC<TopLinkProps> = ({ serviceId, links, adminUrl }) => {
         target="_blank"
         class="text-gray-400 hover:text-gray-600 flex items-center"
       >
-        Admin
+        Dashboard
         <ExternalLinkIcon />
       </a>
     </div>

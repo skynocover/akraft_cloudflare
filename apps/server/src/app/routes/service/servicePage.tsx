@@ -15,6 +15,8 @@ interface ServicePageProps {
   threads: ThreadWithReplies[];
   totalPages: number;
   adminUrl?: string;
+  user?: { name: string; email: string } | null;
+  isAdmin?: boolean;
 }
 
 export const ServicePage: FC<ServicePageProps> = ({
@@ -24,6 +26,8 @@ export const ServicePage: FC<ServicePageProps> = ({
   threads,
   totalPages,
   adminUrl,
+  user,
+  isAdmin,
 }) => {
   if (!service) {
     return (
@@ -46,12 +50,13 @@ export const ServicePage: FC<ServicePageProps> = ({
   return (
     <Layout title={service.name}>
       <div class="container mx-auto p-6 max-w-6xl relative">
-        <TopLink links={service.metadata?.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} />
+        <TopLink links={service.metadata?.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} user={user} currentPath={`/service/${serviceId}`} />
         <Title title={service.name || ""} links={service.metadata?.headLinks || []} />
 
         <PostCard
           serviceId={serviceId}
           description={service.metadata?.description || ""}
+          isAdmin={isAdmin}
         />
 
         <Pagination
@@ -66,6 +71,7 @@ export const ServicePage: FC<ServicePageProps> = ({
             serviceId={serviceId}
             thread={thread}
             isPreview={true}
+            isAdmin={isAdmin}
           />
         ))}
 
