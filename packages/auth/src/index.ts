@@ -20,12 +20,29 @@ export function createAuth(env: {
 }) {
 	const db = createDb(env.DB);
 
+	// Build trusted origins list (include www and non-www variants)
+	const buildTrustedOrigins = (urls: string[]) => {
+		const origins = new Set<string>();
+		for (const url of urls) {
+			if (!url) continue;
+			origins.add(url);
+			// Add www variant if not present
+			if (url.includes("://www.")) {
+				origins.add(url.replace("://www.", "://"));
+			} else if (url.match(/:\/\/[^/]+/) && !url.includes("://localhost")) {
+				origins.add(url.replace("://", "://www."));
+			}
+		}
+		return Array.from(origins);
+	};
+
 	const auth = betterAuth({
 		database: drizzleAdapter(db, {
 			provider: "sqlite",
 			schema: schema,
 		}),
-		trustedOrigins: [env.CORS_ORIGIN],
+		// Include dashboard (CORS_ORIGIN) and server (BETTER_AUTH_URL) with www/non-www variants
+		trustedOrigins: buildTrustedOrigins([env.CORS_ORIGIN, env.BETTER_AUTH_URL]),
 		emailAndPassword: {
 			enabled: true,
 		},
@@ -40,7 +57,8 @@ export function createAuth(env: {
 		advanced: {
 			defaultCookieAttributes: {
 				sameSite: "lax",
-				secure: false,
+				// secure should be true for HTTPS (production)
+				secure: env.BETTER_AUTH_URL.startsWith("https://"),
 				httpOnly: true,
 			},
 		},
