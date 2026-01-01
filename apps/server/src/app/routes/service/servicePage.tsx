@@ -45,12 +45,12 @@ export const ServicePage: FC<ServicePageProps> = ({
   return (
     <Layout title={service.name}>
       <div class="container mx-auto p-6 max-w-6xl relative">
-        <TopLink links={service.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} />
-        <Title title={service.name || ""} links={service.headLinks || []} />
+        <TopLink links={service.metadata?.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} />
+        <Title title={service.name || ""} links={service.metadata?.headLinks || []} />
 
         <PostCard
           serviceId={serviceId}
-          description={service.description || ""}
+          description={service.metadata?.description || ""}
         />
 
         <Pagination
@@ -65,7 +65,6 @@ export const ServicePage: FC<ServicePageProps> = ({
             serviceId={serviceId}
             thread={thread}
             isPreview={true}
-            serviceOwnerId={service.ownerId}
           />
         ))}
 

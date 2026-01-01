@@ -7,6 +7,7 @@ export interface LinkItem {
 
 // Organization metadata for forum-specific settings
 export interface OrganizationMetadata {
+  description?: string;
   topLinks?: LinkItem[];
   headLinks?: LinkItem[];
   forbidContents?: string[];

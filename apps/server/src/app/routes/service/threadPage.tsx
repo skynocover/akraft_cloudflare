@@ -40,8 +40,8 @@ export const ThreadPage: FC<ThreadPageProps> = ({
   return (
     <Layout title={`${thread.title} - ${service.name}`}>
       <div class="container mx-auto p-6 max-w-6xl relative">
-        <TopLink links={service.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} />
-        <Title title={service.name || ""} links={service.headLinks || []} />
+        <TopLink links={service.metadata?.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} />
+        <Title title={service.name || ""} links={service.metadata?.headLinks || []} />
 
         {/* Back link */}
         <div class="mb-4">
@@ -58,7 +58,6 @@ export const ThreadPage: FC<ThreadPageProps> = ({
           serviceId={serviceId}
           thread={thread}
           isPreview={false}
-          serviceOwnerId={service.ownerId}
         />
       </div>
     </Layout>

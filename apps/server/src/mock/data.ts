@@ -5,35 +5,30 @@ export const mockServices: Record<string, Service> = {
   "demo-service": {
     id: "demo-service",
     name: "General Discussion",
-    description: `Welcome to the General Discussion forum!
-
-**Rules:**
-1. Please maintain a friendly atmosphere
-2. No illegal content
-3. No spamming
-
-Markdown syntax is supported`,
-    ownerId: "admin-user-id",
-    topLinks: [
-      { name: "Home", url: "/" },
-      { name: "Rules", url: "#rules" },
-      { name: "Report", url: "#report" },
-    ],
-    headLinks: [
-      { name: "GitHub", url: "https://github.com" },
-      { name: "Discord", url: "https://discord.com" },
-    ],
+    createdAt: new Date(),
+    metadata: {
+      topLinks: [
+        { name: "Home", url: "/" },
+        { name: "Rules", url: "#rules" },
+        { name: "Report", url: "#report" },
+      ],
+      headLinks: [
+        { name: "GitHub", url: "https://github.com" },
+        { name: "Discord", url: "https://discord.com" },
+      ],
+    },
   },
   "tech-forum": {
     id: "tech-forum",
     name: "Tech Forum",
-    description: "Discuss programming and software development topics",
-    ownerId: "admin-user-id",
-    topLinks: [
-      { name: "Home", url: "/" },
-      { name: "General", url: "/service/demo-service" },
-    ],
-    headLinks: [],
+    createdAt: new Date(),
+    metadata: {
+      topLinks: [
+        { name: "Home", url: "/" },
+        { name: "General", url: "/service/demo-service" },
+      ],
+      headLinks: [],
+    },
   },
 };
 
@@ -98,7 +93,7 @@ const generateMockThreads = (serviceId: string, count: number): ThreadWithReplie
 
     threads.push({
       id: threadId,
-      serviceId,
+      organizationId: serviceId,
       title: topic.title,
       name: i % 2 === 0 ? "Anonymous" : `User${i + 1}`,
       content: topic.content,
@@ -117,7 +112,7 @@ export const mockThreads: Record<string, ThreadWithReplies[]> = {
   "demo-service": [
     {
       id: "thread-1",
-      serviceId: "demo-service",
+      organizationId: "demo-service",
       title: "Welcome to the New Forum!",
       name: "Admin",
       content: `# Welcome to the New Forum!
@@ -144,7 +139,7 @@ Feel free to ask questions here!`,
     },
     {
       id: "thread-2",
-      serviceId: "demo-service",
+      organizationId: "demo-service",
       title: "Nice weather today",
       name: "Anonymous",
       content: "Let's go outside!\n\nThe weather is so nice, don't stay indoors all day.",
@@ -154,7 +149,7 @@ Feel free to ask questions here!`,
     },
     {
       id: "thread-3",
-      serviceId: "demo-service",
+      organizationId: "demo-service",
       title: "Movie Recommendation",
       name: "MovieFan",
       content: `Just watched an amazing movie, highly recommend!
@@ -173,7 +168,7 @@ Anyone else seen it? Let's discuss!`,
     },
     {
       id: "thread-4",
-      serviceId: "demo-service",
+      organizationId: "demo-service",
       title: "Beginner programmer needs help",
       name: "NewDev",
       content: `Hi everyone, I'm just starting to learn programming.
@@ -195,7 +190,7 @@ Any guidance would be appreciated!`,
     },
     {
       id: "thread-5",
-      serviceId: "demo-service",
+      organizationId: "demo-service",
       title: "Weekend meetup - looking for people",
       name: "EventOrganizer",
       content: "Anyone want to hang out this weekend?\n\nLocation: Downtown\nTime: Saturday 6 PM\n\nLeave a comment if interested!",
@@ -209,7 +204,7 @@ Any guidance would be appreciated!`,
   "tech-forum": [
     {
       id: "tech-thread-1",
-      serviceId: "tech-forum",
+      organizationId: "tech-forum",
       title: "React 19 New Features Discussion",
       name: "FrontendDev",
       content: `React 19 brings many exciting new features!

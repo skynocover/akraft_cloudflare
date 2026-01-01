@@ -1,43 +1,25 @@
-# 組織
+# TODO
 
-實作以下部分
+## Completed
 
-1. ~~如果現在還沒有 那麼需要安裝better auth的organization~~ ✅ 已完成
-2. ~~organization就是目前的service 為了簡潔 你可以把兩個做整合 前端叫做service DB叫做organize~~ ✅ 已完成
-3. ~~用戶註冊時 自動建立一個組織 名稱為 {username}'s board 也可以自行建立~~ ✅ 已完成
-4. ~~跟一般的SaaS相同 用戶在dashboard時可以在左上角切換組織 切換到哪一個組織記錄在localstorage~~ ✅ 已完成
-5. ~~在後台也就是web的那個vite服務登入後 會自動跳轉到localstorage記錄的組織 http://localhost:3001/dashboard/rec_cqvkdi9bsa448tm365f0~~ ✅ 已完成
-6. ~~如果找不到紀錄的組織 那就找其中一個組織 然後跳轉就去~~ ✅ 已完成
-7. ~~如果用戶沒有組織 則跳轉到一個頁面 讓用戶自行建立~~ ✅ 已完成
+### Organization (Service Migration)
 
-## 實作說明
+All issues have been resolved:
 
-### 1. Better Auth Organization Plugin
-- 在 `packages/auth/src/index.ts` 安裝了 organization plugin
-- 在 `apps/web/src/lib/auth-client.ts` 添加了 organizationClient
+1. **Dashboard description save issue** - Fixed! The `getService` endpoint was returning an empty string for `description` instead of reading from metadata
+2. **Description not showing on forum pages** - Fixed! `ServicePage` was passing empty string to `PostCard`. Now correctly passes `service.metadata?.description`
+3. **TopLinks/HeadLinks not showing on forum pages** - Fixed by updating `ServicePage` and `ThreadPage` to access `service.metadata?.topLinks` and `service.metadata?.headLinks`
+4. **Database migration** - Added `organization_id` column to `threads` and `reports` tables to support Better Auth organization system
+5. **Added `description` field to `OrganizationMetadata` type** - Type safety for description field
 
-### 2. 資料庫 Schema
-- 在 `packages/db/src/schema/auth.ts` 添加了：
-  - `organization` 表：儲存組織資訊
-  - `member` 表：用戶與組織的關聯
-  - `invitation` 表：組織邀請
-  - `session` 表添加 `activeOrganizationId` 欄位
+### TypeScript Fixes
 
-### 3. 自動建立組織
-- 使用 Better Auth 的 `databaseHooks.user.create.after` 在用戶註冊後自動建立組織
-- 組織名稱格式：`{username}'s board`
+- Fixed type errors in `moderation.ts` (CIDR parsing)
+- Fixed type errors in `content-safety.ts` (array buffer handling)
+- Fixed type errors in `mock/data.ts` (updated to use new Organization type with metadata)
+- Fixed type errors in `admin.ts` (removed unused schemas, fixed undefined handling)
 
-### 4. 組織切換器
-- 新增 `apps/web/src/components/service-switcher.tsx`
-- 在 dashboard 頁面的 header 左上角顯示
-- 選擇的組織 ID 儲存在 localStorage (`akraft-active-service`)
+## Notes
 
-### 5. Dashboard 重導向邏輯
-- 更新 `apps/web/src/routes/dashboard.tsx` 的 beforeLoad
-- 自動重導向到 localStorage 記錄的組織或第一個組織
-
-### 6. 建立組織頁面
-- 新增 `apps/web/src/routes/dashboard.create.tsx`
-- 當用戶沒有任何組織時會被導向此頁面
-
-
+- For production deployment, remember to run the same database migration SQL on the remote D1 database
+- The old `services` table still exists but is no longer used - forum now uses Better Auth's `organization` table

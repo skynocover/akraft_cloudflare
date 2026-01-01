@@ -12,24 +12,6 @@ const linkItemSchema = z.object({
   url: z.string(),
 });
 
-// Metadata schema for organization forum settings
-const metadataSchema = z.object({
-  topLinks: z.array(linkItemSchema).optional(),
-  headLinks: z.array(linkItemSchema).optional(),
-  forbidContents: z.array(z.string()).optional(),
-  blockedIPs: z.array(z.string()).optional(),
-  auth: z.record(z.string(), z.string()).optional(),
-  visible: z.boolean().optional(),
-});
-
-const organizationUpdateSchema = z.object({
-  organizationId: z.string(),
-  name: z.string().optional(),
-  slug: z.string().optional(),
-  logo: z.string().optional(),
-  metadata: metadataSchema.optional(),
-});
-
 // Helper to check if user is organization member with owner role
 async function checkOrganizationOwner(userId: string, organizationId: string) {
   const db = createDb(env.DB);
@@ -92,7 +74,7 @@ export const getService = protectedProcedure
       name: org.name,
       slug: org.slug || "",
       logo: org.logo || "",
-      description: "", // For backward compatibility
+      description: (metadata as Record<string, unknown>).description as string || "",
       ownerId: "", // Deprecated - use member table
       topLinks: (metadata as Record<string, unknown>).topLinks || [],
       headLinks: (metadata as Record<string, unknown>).headLinks || [],
@@ -299,15 +281,16 @@ export const updateService = protectedProcedure
       .where(eq(schema.organization.id, input.serviceId))
       .limit(1);
 
-    if (current.length === 0) {
+    const org = current[0];
+    if (!org) {
       throw new ORPCError("NOT_FOUND", { message: "Organization not found" });
     }
 
     // Parse existing metadata
     let existingMetadata: Record<string, unknown> = {};
-    if (current[0].metadata) {
+    if (org.metadata) {
       try {
-        existingMetadata = JSON.parse(current[0].metadata);
+        existingMetadata = JSON.parse(org.metadata);
       } catch {
         existingMetadata = {};
       }

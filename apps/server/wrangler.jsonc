@@ -24,7 +24,7 @@
                 {
                     "binding": "DB",
                     "database_name": "akraft-db",
-                    "database_id": "df003925-1564-4a34-9d1c-4327f75c1c5d",
+                    "database_id": "68aadc45-682b-4ff0-bd0a-c868d4a5a709",
                     "migrations_dir": "../../packages/db/src/migrations"
                 }
             ],

@@ -171,7 +171,14 @@ export function checkModeration(
  */
 function ipMatchesCIDR(ip: string, cidr: string): boolean {
   try {
-    const [cidrIP, cidrMask] = cidr.split('/');
+    const parts = cidr.split('/');
+    const cidrIP = parts[0];
+    const cidrMask = parts[1];
+
+    if (!cidrIP || !cidrMask) {
+      return false;
+    }
+
     const mask = parseInt(cidrMask, 10);
 
     if (isNaN(mask) || mask < 0 || mask > 32) {
