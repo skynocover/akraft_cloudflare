@@ -8,6 +8,13 @@
       "when": 1735660800000,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1767247568032,
+      "tag": "0001_flippant_nemesis",
+      "breakpoints": true
     }
   ]
 }

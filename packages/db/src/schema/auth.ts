@@ -50,6 +50,9 @@ export const organization = sqliteTable(
 		slug: text("slug").unique(),
 		logo: text("logo"),
 		metadata: text("metadata"), // JSON string for extra data
+		showOnHome: integer("show_on_home", { mode: "boolean" })
+			.default(false)
+			.notNull(),
 		createdAt: integer("created_at", { mode: "timestamp_ms" })
 			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
 			.notNull(),

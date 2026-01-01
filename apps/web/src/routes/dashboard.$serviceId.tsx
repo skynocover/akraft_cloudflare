@@ -16,6 +16,7 @@ export interface Service {
   name: string;
   description: string;
   ownerId: string;
+  showOnHome: boolean;
   topLinks: { name: string; url: string }[];
   headLinks: { name: string; url: string }[];
   forbidContents: string[];

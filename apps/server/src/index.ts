@@ -22,6 +22,7 @@ import {
   createReport,
   getThreadServiceId,
   generateUserIdFromIp,
+  getHomePageData,
 } from './lib/db/queries';
 
 // R2 upload helper
@@ -96,14 +97,25 @@ app.use('/*', async (c, next) => {
 
 // Import HonoX routes
 import helloApi from './app/routes/api/hello';
-import Home from './app/routes/index';
+import { HomePage } from './app/routes/homePage';
 import { ServicePage } from './app/routes/service/servicePage';
 import { ThreadPage } from './app/routes/service/threadPage';
 
 app.route('/api/hello', helloApi);
 
-app.get('/', (c) => {
-  return c.html(Home());
+// Home page - display all visible organizations with their latest threads
+app.get('/', async (c) => {
+  const dashboardUrl = env.CORS_ORIGIN || '';
+  const db = createDb(env.DB);
+  const imageUrlOptions = {
+    r2PublicUrl: env.R2_PUBLIC_URL,
+    cloudflareImagesUrl: env.CLOUDFLARE_IMAGES_URL,
+  };
+
+  const organizations = await getHomePageData(db, 5, imageUrlOptions);
+
+  const html = HomePage({ organizations, dashboardUrl });
+  return c.html(html as string);
 });
 
 // Service page - display thread list

@@ -23,6 +23,7 @@ export interface Organization {
   slug?: string;
   logo?: string;
   metadata?: OrganizationMetadata;
+  showOnHome?: boolean;
   createdAt: Date;
 }
 
@@ -60,6 +61,7 @@ export interface Thread {
 
 export interface ThreadWithReplies extends Thread {
   replies: Reply[];
+  replyCount?: number;
 }
 
 export interface Report {

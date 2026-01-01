@@ -74,6 +74,7 @@ export const getService = protectedProcedure
       name: org.name,
       slug: org.slug || "",
       logo: org.logo || "",
+      showOnHome: org.showOnHome || false,
       description: (metadata as Record<string, unknown>).description as string || "",
       ownerId: "", // Deprecated - use member table
       topLinks: (metadata as Record<string, unknown>).topLinks || [],
@@ -259,6 +260,7 @@ export const updateService = protectedProcedure
       name: z.string().optional(),
       slug: z.string().optional(),
       logo: z.string().optional(),
+      showOnHome: z.boolean().optional(),
       // Backward compatibility fields stored in metadata
       description: z.string().optional(),
       topLinks: z.array(linkItemSchema).optional(),
@@ -315,6 +317,7 @@ export const updateService = protectedProcedure
     if (input.name !== undefined) updateData.name = input.name;
     if (input.slug !== undefined) updateData.slug = input.slug;
     if (input.logo !== undefined) updateData.logo = input.logo;
+    if (input.showOnHome !== undefined) updateData.showOnHome = input.showOnHome;
 
     await db
       .update(schema.organization)

@@ -19,6 +19,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import LoadingOverlay from "./LoadingOverlay";
 import { client } from "@/utils/orpc";
 
@@ -32,6 +34,7 @@ interface Service {
   name: string;
   description: string;
   ownerId: string;
+  showOnHome: boolean;
   topLinks: LinkItem[];
   headLinks: LinkItem[];
   forbidContents: string[];
@@ -85,6 +88,7 @@ const ServiceEditor: React.FC<ServiceEditorProps> = ({
         serviceId,
         name: editedService.name,
         description: editedService.description,
+        showOnHome: editedService.showOnHome,
         topLinks: editedService.topLinks,
         headLinks: editedService.headLinks,
         forbidContents: editedService.forbidContents?.filter((item) => !!item),
@@ -126,6 +130,25 @@ const ServiceEditor: React.FC<ServiceEditorProps> = ({
             placeholder="Service Name"
             className="text-xl font-bold bg-muted"
           />
+
+          {/* Show on Home Switch */}
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div className="space-y-0.5">
+              <Label htmlFor="showOnHome" className="text-base font-medium">
+                顯示在首頁
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                開啟後此版面會顯示在網站首頁
+              </p>
+            </div>
+            <Switch
+              id="showOnHome"
+              checked={editedService.showOnHome || false}
+              onCheckedChange={(checked) =>
+                setEditedService({ ...editedService, showOnHome: checked })
+              }
+            />
+          </div>
 
           <Textarea
             name="description"

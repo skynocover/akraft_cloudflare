@@ -354,3 +354,95 @@ export async function getThreadOrganizationId(
 
 // Alias for backward compatibility
 export const getThreadServiceId = getThreadOrganizationId;
+
+// ========== Home Page Queries ==========
+
+// Get all organizations that should be shown on home page
+export async function getVisibleOrganizations(
+  db: DbInstance
+): Promise<Organization[]> {
+  const rows = await db
+    .select()
+    .from(schema.organization)
+    .where(eq(schema.organization.showOnHome, true))
+    .orderBy(desc(schema.organization.createdAt));
+
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    slug: row.slug || undefined,
+    logo: row.logo || undefined,
+    showOnHome: row.showOnHome,
+    metadata: parseJsonField<OrganizationMetadata>(row.metadata, {}),
+    createdAt: new Date(row.createdAt),
+  }));
+}
+
+// Get latest threads for an organization (for home page preview)
+export async function getLatestThreadsForOrganization(
+  db: DbInstance,
+  organizationId: string,
+  limit: number = 5,
+  imageUrlOptions?: ImageUrlOptions
+): Promise<ThreadWithReplies[]> {
+  const threadRows = await db
+    .select()
+    .from(schema.threads)
+    .where(eq(schema.threads.organizationId, organizationId))
+    .orderBy(desc(schema.threads.replyAt))
+    .limit(limit);
+
+  // Get reply counts for each thread
+  const threads: ThreadWithReplies[] = await Promise.all(
+    threadRows.map(async (thread) => {
+      const replyCountResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(schema.replies)
+        .where(eq(schema.replies.threadId, thread.id));
+
+      const replyCount = replyCountResult[0]?.count || 0;
+
+      return {
+        id: thread.id,
+        organizationId: thread.organizationId,
+        title: thread.title,
+        name: thread.name || "Anonymous",
+        content: thread.content || "",
+        userId: thread.userId || undefined,
+        userIp: thread.userIp || undefined,
+        imageToken: thread.imageToken || undefined,
+        image: getImageUrl(thread.imageToken, imageUrlOptions),
+        youtubeID: thread.youtubeId || undefined,
+        replyAt: new Date(thread.replyAt),
+        createdAt: new Date(thread.createdAt),
+        replies: [], // Empty for preview, just need count
+        replyCount,
+      };
+    })
+  );
+
+  return threads;
+}
+
+// Get home page data: all visible organizations with their latest threads
+export async function getHomePageData(
+  db: DbInstance,
+  threadsPerOrg: number = 5,
+  imageUrlOptions?: ImageUrlOptions
+): Promise<{ organization: Organization; threads: ThreadWithReplies[] }[]> {
+  const organizations = await getVisibleOrganizations(db);
+
+  const data = await Promise.all(
+    organizations.map(async (org) => ({
+      organization: org,
+      threads: await getLatestThreadsForOrganization(
+        db,
+        org.id,
+        threadsPerOrg,
+        imageUrlOptions
+      ),
+    }))
+  );
+
+  return data;
+}
