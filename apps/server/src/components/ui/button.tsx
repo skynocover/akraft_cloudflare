@@ -2,6 +2,7 @@ import type { FC, PropsWithChildren } from "hono/jsx";
 import { cn } from "../../lib/utils";
 
 interface ButtonProps {
+  id?: string;
   type?: "button" | "submit" | "reset";
   class?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -27,6 +28,7 @@ const sizeStyles: Record<string, string> = {
 
 export const Button: FC<PropsWithChildren<ButtonProps>> = ({
   children,
+  id,
   type = "button",
   class: className,
   variant = "default",
@@ -35,6 +37,7 @@ export const Button: FC<PropsWithChildren<ButtonProps>> = ({
 }) => {
   return (
     <button
+      id={id}
       type={type}
       disabled={disabled}
       class={cn(

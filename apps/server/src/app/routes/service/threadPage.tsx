@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { Layout } from "../../../components/Layout";
 import { TopLink } from "../../../components/layout/TopLink";
 import { Title } from "../../../components/layout/Title";
+import { Footer } from "../../../components/layout/Footer";
 import { Thread } from "../../../components/thread/Thread";
 import type { Service, ThreadWithReplies } from "../../../types/forum";
 
@@ -59,6 +60,8 @@ export const ThreadPage: FC<ThreadPageProps> = ({
           thread={thread}
           isPreview={false}
         />
+
+        <Footer />
       </div>
     </Layout>
   );

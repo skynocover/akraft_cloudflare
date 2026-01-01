@@ -44,9 +44,11 @@ export const Header: FC<HeaderProps> = ({ dashboardUrl }) => {
         {dashboardUrl && (
           <a
             href={dashboardUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             class="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground h-9 px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors"
           >
-            管理
+            Dashboard
           </a>
         )}
       </nav>

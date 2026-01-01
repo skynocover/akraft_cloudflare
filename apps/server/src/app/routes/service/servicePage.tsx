@@ -3,6 +3,7 @@ import { Layout } from "../../../components/Layout";
 import { TopLink } from "../../../components/layout/TopLink";
 import { Title } from "../../../components/layout/Title";
 import { Pagination } from "../../../components/layout/Pagination";
+import { Footer } from "../../../components/layout/Footer";
 import { PostCard } from "../../../components/thread/PostCard";
 import { Thread } from "../../../components/thread/Thread";
 import type { Service, ThreadWithReplies } from "../../../types/forum";
@@ -73,6 +74,8 @@ export const ServicePage: FC<ServicePageProps> = ({
           currentPage={page}
           baseUrl={baseUrl}
         />
+
+        <Footer />
       </div>
     </Layout>
   );

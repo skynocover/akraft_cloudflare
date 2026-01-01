@@ -3,10 +3,12 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "tsdown",
+    "build": "pnpm run build:css && tsdown",
+    "build:css": "pnpm exec tailwindcss -i ./src/styles/input.css -o ./public/styles.css --minify",
     "check-types": "tsc -b",
     "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
-    "dev": "wrangler dev",
+    "dev": "pnpm run build:css && concurrently \"pnpm run dev:css\" \"wrangler dev\"",
+    "dev:css": "pnpm exec tailwindcss -i ./src/styles/input.css -o ./public/styles.css --watch",
     "dev:remote": "wrangler dev --remote --env production"
   },
   "dependencies": {
@@ -36,8 +38,11 @@
   "devDependencies": {
     "@akraft-cloudflare/config": "workspace:*",
     "@cloudflare/workers-types": "catalog:",
+    "@tailwindcss/cli": "^4.0.15",
     "@types/node": "^22.13.11",
     "alchemy": "^0.81.1",
+    "concurrently": "^9.1.2",
+    "tailwindcss": "^4.0.15",
     "tsdown": "^0.16.5",
     "typescript": "catalog:",
     "wrangler": "^4.40.3"

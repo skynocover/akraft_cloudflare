@@ -26,7 +26,7 @@ export const HomePage: FC<HomePageProps> = ({ organizations, dashboardUrl }) => 
             Akraft
           </h1>
           <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
-            匿名掲示板プラットフォーム - 自由に議論しよう
+            Anonymous discussion platform - Speak freely
           </p>
         </div>
 
@@ -60,17 +60,19 @@ export const HomePage: FC<HomePageProps> = ({ organizations, dashboardUrl }) => 
               </svg>
             </div>
             <h2 class="text-xl font-semibold text-foreground mb-2">
-              まだ掲示板がありません
+              No forums yet
             </h2>
             <p class="text-muted-foreground mb-6">
-              管理者が掲示板を作成すると、ここに表示されます
+              Forums will appear here when created by administrators
             </p>
             {dashboardUrl && (
               <a
                 href={dashboardUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 class="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground h-10 px-6 text-sm font-medium hover:bg-primary/90 transition-colors"
               >
-                管理画面へ
+                Go to Dashboard
               </a>
             )}
           </div>

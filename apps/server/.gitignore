@@ -1,5 +1,8 @@
 # prod
 dist/
+
+# generated files
+public/styles.css
 /build
 /out/
 
