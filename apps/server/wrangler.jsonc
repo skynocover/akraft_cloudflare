@@ -25,13 +25,15 @@
                     "binding": "DB",
                     "database_name": "akraft-db",
                     "database_id": "68aadc45-682b-4ff0-bd0a-c868d4a5a709",
-                    "migrations_dir": "../../packages/db/src/migrations"
+                    "migrations_dir": "../../packages/db/src/migrations",
+                    "preview_database_id": "68aadc45-682b-4ff0-bd0a-c868d4a5a709"
                 }
             ],
             "r2_buckets": [
                 {
                     "binding": "R2",
-                    "bucket_name": "akraft-storage"
+                    "bucket_name": "akraft-storage",
+                    "preview_bucket_name": "akraft-storage"
                 }
             ]
         }

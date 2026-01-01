@@ -6,7 +6,8 @@
     "build": "tsdown",
     "check-types": "tsc -b",
     "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
-    "dev": "wrangler dev"
+    "dev": "wrangler dev",
+    "dev:remote": "wrangler dev --remote --env production"
   },
   "dependencies": {
     "@akraft-cloudflare/api": "workspace:*",
