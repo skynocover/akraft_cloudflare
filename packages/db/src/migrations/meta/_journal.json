@@ -1,11 +1,12 @@
 {
   "version": "7",
+  "dialect": "sqlite",
   "entries": [
     {
       "idx": 0,
-      "version": "6",
-      "when": 1767091548537,
-      "tag": "0000_clammy_silver_fox",
+      "version": "7",
+      "when": 1735660800000,
+      "tag": "0000_init",
       "breakpoints": true
     }
   ]
