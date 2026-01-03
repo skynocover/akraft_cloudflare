@@ -172,6 +172,7 @@ app.get('/', async (c) => {
 app.get('/service/:serviceId', async (c) => {
   const serviceId = c.req.param('serviceId');
   const page = parseInt(c.req.query('page') || '1', 10);
+  const searchQuery = c.req.query('q') || undefined;
   const adminUrl = env.CORS_ORIGIN || '';
 
   const db = createDb(env.DB);
@@ -181,13 +182,13 @@ app.get('/service/:serviceId', async (c) => {
     cloudflareImagesUrl: env.CLOUDFLARE_IMAGES_URL,
   };
   const { threads, totalPages } = service
-    ? await getThreads(db, serviceId, page, 10, imageUrlOptions)
+    ? await getThreads(db, serviceId, page, 10, imageUrlOptions, searchQuery)
     : { threads: [], totalPages: 0 };
 
   // Get session info to check if user is admin
   const { user, isAdmin } = await getSessionInfo(c, serviceId);
 
-  const html = ServicePage({ serviceId, page, service, threads, totalPages, adminUrl, user, isAdmin });
+  const html = ServicePage({ serviceId, page, service, threads, totalPages, adminUrl, user, isAdmin, searchQuery });
   return c.html(html as string);
 });
 

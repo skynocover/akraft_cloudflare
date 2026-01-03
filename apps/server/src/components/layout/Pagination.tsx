@@ -47,7 +47,9 @@ export const Pagination: FC<PaginationProps> = ({
   baseUrl,
 }) => {
   const getPageLink = (page: number) => {
-    return `${baseUrl}?page=${page}`;
+    // Handle URLs that already have query parameters
+    const separator = baseUrl.includes("?") ? "&" : "?";
+    return `${baseUrl}${separator}page=${page}`;
   };
 
   const renderPageNumbers = () => {

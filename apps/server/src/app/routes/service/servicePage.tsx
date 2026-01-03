@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { Layout } from "../../../components/Layout";
 import { TopLink } from "../../../components/layout/TopLink";
 import { Title } from "../../../components/layout/Title";
+import { SearchBox } from "../../../components/layout/SearchBox";
 import { Pagination } from "../../../components/layout/Pagination";
 import { Footer } from "../../../components/layout/Footer";
 import { PostCard } from "../../../components/thread/PostCard";
@@ -17,6 +18,7 @@ interface ServicePageProps {
   adminUrl?: string;
   user?: { name: string; email: string } | null;
   isAdmin?: boolean;
+  searchQuery?: string;
 }
 
 export const ServicePage: FC<ServicePageProps> = ({
@@ -28,6 +30,7 @@ export const ServicePage: FC<ServicePageProps> = ({
   adminUrl,
   user,
   isAdmin,
+  searchQuery,
 }) => {
   if (!service) {
     return (
@@ -45,13 +48,18 @@ export const ServicePage: FC<ServicePageProps> = ({
     );
   }
 
-  const baseUrl = `/service/${serviceId}`;
+  // Build base URL with search query if present
+  const baseUrl = searchQuery
+    ? `/service/${serviceId}?q=${encodeURIComponent(searchQuery)}`
+    : `/service/${serviceId}`;
 
   return (
     <Layout title={service.name}>
       <div class="container mx-auto p-6 max-w-6xl relative">
         <TopLink links={service.metadata?.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} user={user} currentPath={`/service/${serviceId}`} />
         <Title title={service.name || ""} links={service.metadata?.headLinks || []} />
+
+        <SearchBox serviceId={serviceId} query={searchQuery} />
 
         <PostCard
           serviceId={serviceId}

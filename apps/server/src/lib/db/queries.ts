@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/d1";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, like, or, and } from "drizzle-orm";
 import * as schema from "@akraft-cloudflare/db/schema";
 import type { Organization, OrganizationMetadata, ThreadWithReplies, Reply } from "../../types/forum";
 
@@ -85,19 +85,34 @@ export async function getOrganization(
 // Alias for backward compatibility
 export const getService = getOrganization;
 
-// Get threads with pagination
+// Get threads with pagination and optional search
 export async function getThreads(
   db: DbInstance,
   organizationId: string,
   page: number = 1,
   pageSize: number = 10,
-  imageUrlOptions?: ImageUrlOptions
+  imageUrlOptions?: ImageUrlOptions,
+  searchQuery?: string
 ): Promise<{ threads: ThreadWithReplies[]; totalPages: number }> {
+  // Build where conditions
+  const baseCondition = eq(schema.threads.organizationId, organizationId);
+
+  // Add search condition if query is provided
+  let whereCondition = baseCondition;
+  if (searchQuery && searchQuery.trim()) {
+    const searchPattern = `%${searchQuery.trim()}%`;
+    const searchCondition = or(
+      like(schema.threads.title, searchPattern),
+      like(schema.threads.content, searchPattern)
+    );
+    whereCondition = and(baseCondition, searchCondition)!;
+  }
+
   // Get total count
   const countResult = await db
     .select({ count: sql<number>`count(*)` })
     .from(schema.threads)
-    .where(eq(schema.threads.organizationId, organizationId));
+    .where(whereCondition);
 
   const totalCount = countResult[0]?.count || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -107,7 +122,7 @@ export async function getThreads(
   const threadRows = await db
     .select()
     .from(schema.threads)
-    .where(eq(schema.threads.organizationId, organizationId))
+    .where(whereCondition)
     .orderBy(desc(schema.threads.replyAt))
     .limit(pageSize)
     .offset(offset);
