@@ -97,13 +97,15 @@ export async function getThreads(
   // Build where conditions
   const baseCondition = eq(schema.threads.organizationId, organizationId);
 
-  // Add search condition if query is provided
+  // Add search condition if query is provided (searches title, content, and replies)
   let whereCondition = baseCondition;
   if (searchQuery && searchQuery.trim()) {
     const searchPattern = `%${searchQuery.trim()}%`;
+    // Search in title, content, or any reply content using EXISTS subquery
     const searchCondition = or(
       like(schema.threads.title, searchPattern),
-      like(schema.threads.content, searchPattern)
+      like(schema.threads.content, searchPattern),
+      sql`EXISTS (SELECT 1 FROM replies WHERE replies.thread_id = ${schema.threads.id} AND replies.content LIKE ${searchPattern})`
     );
     whereCondition = and(baseCondition, searchCondition)!;
   }

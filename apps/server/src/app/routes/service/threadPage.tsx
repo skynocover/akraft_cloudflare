@@ -44,8 +44,8 @@ export const ThreadPage: FC<ThreadPageProps> = ({
 
   return (
     <Layout title={`${thread.title} - ${service.name}`}>
-      <div class="container mx-auto p-6 max-w-6xl relative">
-        <TopLink links={service.metadata?.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} user={user} currentPath={`/service/${serviceId}/${thread.id}`} />
+      <div class="container mx-auto px-6 pb-6 pt-2 max-w-6xl">
+        <TopLink links={service.metadata?.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} user={user} currentPath={`/service/${serviceId}/${thread.id}`} showSearch={false} />
         <Title title={service.name || ""} links={service.metadata?.headLinks || []} />
 
         {/* Back link */}

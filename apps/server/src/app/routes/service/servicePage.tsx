@@ -2,7 +2,6 @@ import type { FC } from "hono/jsx";
 import { Layout } from "../../../components/Layout";
 import { TopLink } from "../../../components/layout/TopLink";
 import { Title } from "../../../components/layout/Title";
-import { SearchBox } from "../../../components/layout/SearchBox";
 import { Pagination } from "../../../components/layout/Pagination";
 import { Footer } from "../../../components/layout/Footer";
 import { PostCard } from "../../../components/thread/PostCard";
@@ -55,11 +54,9 @@ export const ServicePage: FC<ServicePageProps> = ({
 
   return (
     <Layout title={service.name}>
-      <div class="container mx-auto p-6 max-w-6xl relative">
-        <TopLink links={service.metadata?.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} user={user} currentPath={`/service/${serviceId}`} />
+      <div class="container mx-auto px-6 pb-6 pt-2 max-w-6xl">
+        <TopLink links={service.metadata?.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} user={user} currentPath={`/service/${serviceId}`} searchQuery={searchQuery} />
         <Title title={service.name || ""} links={service.metadata?.headLinks || []} />
-
-        <SearchBox serviceId={serviceId} query={searchQuery} />
 
         <PostCard
           serviceId={serviceId}
