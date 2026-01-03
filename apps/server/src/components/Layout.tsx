@@ -14,6 +14,12 @@ export const Layout: FC<LayoutProps> = ({ children, title = "Forum" }) => {
         <title>{title}</title>
         {/* Tailwind CSS - Workers Assets */}
         <link rel="stylesheet" href="/styles.css" />
+        {/* Google AdSense */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4832588143134491"
+          crossorigin="anonymous"
+        />
       </head>
       <body class="min-h-screen bg-background font-sans antialiased">
         <script dangerouslySetInnerHTML={{ __html: markdownToHtmlScript }} />
