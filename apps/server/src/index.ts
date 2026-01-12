@@ -131,6 +131,13 @@ async function getSessionInfo(c: Parameters<Parameters<typeof app.get>[1]>[0], o
 
 app.route('/api/hello', helloApi);
 
+// Serve ads.txt for Google AdSense
+app.get('/ads.txt', (c) => {
+  return c.text('google.com, pub-4832588143134491, DIRECT, f08c47fec0942fa0', {
+    headers: { 'Content-Type': 'text/plain' },
+  });
+});
+
 // Login page
 app.get('/login', async (c) => {
   const callbackURL = c.req.query('callbackURL') || '/';
