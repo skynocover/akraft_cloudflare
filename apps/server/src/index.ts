@@ -103,7 +103,10 @@ import { ThreadPage } from './app/routes/service/threadPage';
 import { LoginPage } from './app/routes/loginPage';
 
 // Helper to get current session and check if user is admin for an organization
-async function getSessionInfo(c: Parameters<Parameters<typeof app.get>[1]>[0], organizationId?: string) {
+async function getSessionInfo(
+  c: Parameters<Parameters<typeof app.get>[1]>[0],
+  organizationId?: string,
+) {
   const auth = createAuth(env);
   const session = await auth.api.getSession({
     headers: c.req.raw.headers,
@@ -118,10 +121,8 @@ async function getSessionInfo(c: Parameters<Parameters<typeof app.get>[1]>[0], o
   if (organizationId) {
     const db = createDb(env.DB);
     const memberResult = await db.query.member.findFirst({
-      where: (member, { and, eq }) => and(
-        eq(member.userId, session.user.id),
-        eq(member.organizationId, organizationId)
-      ),
+      where: (member, { and, eq }) =>
+        and(eq(member.userId, session.user.id), eq(member.organizationId, organizationId)),
     });
     isAdmin = memberResult?.role === 'owner' || memberResult?.role === 'admin';
   }
@@ -130,13 +131,6 @@ async function getSessionInfo(c: Parameters<Parameters<typeof app.get>[1]>[0], o
 }
 
 app.route('/api/hello', helloApi);
-
-// Serve ads.txt for Google AdSense
-app.get('/ads.txt', (c) => {
-  return c.text('google.com, pub-4832588143134491, DIRECT, f08c47fec0942fa0', {
-    headers: { 'Content-Type': 'text/plain' },
-  });
-});
 
 // Login page
 app.get('/login', async (c) => {
@@ -195,7 +189,17 @@ app.get('/service/:serviceId', async (c) => {
   // Get session info to check if user is admin
   const { user, isAdmin } = await getSessionInfo(c, serviceId);
 
-  const html = ServicePage({ serviceId, page, service, threads, totalPages, adminUrl, user, isAdmin, searchQuery });
+  const html = ServicePage({
+    serviceId,
+    page,
+    service,
+    threads,
+    totalPages,
+    adminUrl,
+    user,
+    isAdmin,
+    searchQuery,
+  });
   return c.html(html as string);
 });
 
@@ -248,8 +252,8 @@ app.post('/api/service/:serviceId/thread', async (c) => {
   const formData = await c.req.formData();
 
   const title = formData.get('title') as string;
-  const name = formData.get('name') as string || 'Anonymous';
-  const content = formData.get('content') as string || '';
+  const name = (formData.get('name') as string) || 'Anonymous';
+  const content = (formData.get('content') as string) || '';
   const youtubeLink = formData.get('youtubeLink') as string;
   const imageFile = formData.get('image') as File | null;
 
@@ -296,7 +300,7 @@ app.post('/api/service/:serviceId/thread', async (c) => {
     const safetyResult = await checkContentSafety(
       env.CONTENT_SAFETY_ENDPOINT!,
       env.CONTENT_SAFETY_API_KEY!,
-      { text: `${title} ${content}`, imageData }
+      { text: `${title} ${content}`, imageData },
     );
 
     if (!safetyResult.safe) {
@@ -347,8 +351,8 @@ app.post('/api/service/:serviceId/reply', async (c) => {
   const formData = await c.req.formData();
 
   const threadId = formData.get('threadId') as string;
-  const name = formData.get('name') as string || 'Anonymous';
-  const content = formData.get('content') as string || '';
+  const name = (formData.get('name') as string) || 'Anonymous';
+  const content = (formData.get('content') as string) || '';
   const youtubeLink = formData.get('youtubeLink') as string;
   const sage = formData.get('sage') === 'on';
   const imageFile = formData.get('image') as File | null;
@@ -402,7 +406,7 @@ app.post('/api/service/:serviceId/reply', async (c) => {
     const safetyResult = await checkContentSafety(
       env.CONTENT_SAFETY_ENDPOINT!,
       env.CONTENT_SAFETY_API_KEY!,
-      { text: content, imageData }
+      { text: content, imageData },
     );
 
     if (!safetyResult.safe) {
@@ -452,10 +456,10 @@ app.post('/api/service/:serviceId/report', async (c) => {
   const serviceId = c.req.param('serviceId');
   const formData = await c.req.formData();
 
-  const threadId = formData.get('threadId') as string || undefined;
-  const replyId = formData.get('replyId') as string || undefined;
+  const threadId = (formData.get('threadId') as string) || undefined;
+  const replyId = (formData.get('replyId') as string) || undefined;
   const content = formData.get('content') as string;
-  const reportedIp = formData.get('reportedIp') as string || undefined;
+  const reportedIp = (formData.get('reportedIp') as string) || undefined;
 
   // Get client IP
   const userIp = c.req.header('CF-Connecting-IP') || c.req.header('X-Forwarded-For') || 'unknown';
