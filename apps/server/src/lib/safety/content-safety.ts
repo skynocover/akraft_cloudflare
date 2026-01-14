@@ -5,6 +5,10 @@
 
 const API_VERSION = '2023-10-01';
 
+// Severity threshold for blocking content (0-6)
+// 2 = Low severity, 4 = Medium severity, 6 = High severity
+const DEFAULT_SEVERITY_THRESHOLD = 4;
+
 // Content Safety categories
 export type SafetyCategory = 'Hate' | 'SelfHarm' | 'Sexual' | 'Violence';
 
@@ -29,10 +33,6 @@ export interface SafetyCheckResult {
   error?: string;
 }
 
-// Severity threshold for blocking content (0-6)
-// 2 = Low severity, 4 = Medium severity, 6 = High severity
-const DEFAULT_SEVERITY_THRESHOLD = 2;
-
 /**
  * Check if content safety is configured
  */
@@ -47,7 +47,7 @@ export async function analyzeText(
   endpoint: string,
   apiKey: string,
   text: string,
-  severityThreshold: number = DEFAULT_SEVERITY_THRESHOLD
+  severityThreshold: number = DEFAULT_SEVERITY_THRESHOLD,
 ): Promise<SafetyCheckResult> {
   if (!text || text.trim().length === 0) {
     return { safe: true, blockedCategories: [], details: [] };
@@ -73,7 +73,12 @@ export async function analyzeText(
       const errorText = await response.text();
       console.error('Content Safety API error:', response.status, errorText);
       // If API fails, allow content through (fail-open)
-      return { safe: true, blockedCategories: [], details: [], error: `API error: ${response.status}` };
+      return {
+        safe: true,
+        blockedCategories: [],
+        details: [],
+        error: `API error: ${response.status}`,
+      };
     }
 
     const result: TextAnalysisResult = await response.json();
@@ -104,7 +109,7 @@ export async function analyzeImage(
   endpoint: string,
   apiKey: string,
   imageData: ArrayBuffer,
-  severityThreshold: number = DEFAULT_SEVERITY_THRESHOLD
+  severityThreshold: number = DEFAULT_SEVERITY_THRESHOLD,
 ): Promise<SafetyCheckResult> {
   if (!imageData || imageData.byteLength === 0) {
     return { safe: true, blockedCategories: [], details: [] };
@@ -135,7 +140,12 @@ export async function analyzeImage(
       const errorText = await response.text();
       console.error('Content Safety Image API error:', response.status, errorText);
       // If API fails, allow content through (fail-open)
-      return { safe: true, blockedCategories: [], details: [], error: `API error: ${response.status}` };
+      return {
+        safe: true,
+        blockedCategories: [],
+        details: [],
+        error: `API error: ${response.status}`,
+      };
     }
 
     const result: ImageAnalysisResult = await response.json();
@@ -181,7 +191,7 @@ export async function checkContentSafety(
     text?: string;
     imageData?: ArrayBuffer;
     severityThreshold?: number;
-  }
+  },
 ): Promise<SafetyCheckResult> {
   const { text, imageData, severityThreshold = DEFAULT_SEVERITY_THRESHOLD } = options;
   const results: SafetyCheckResult[] = [];
