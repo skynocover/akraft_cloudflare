@@ -130,6 +130,11 @@ async function getSessionInfo(
   return { user: session.user, isAdmin };
 }
 
+// ads.txt for Google AdSense verification
+app.get('/ads.txt', (c) => {
+  return c.text('google.com, pub-4832588143134491, DIRECT, f08c47fec0942fa0');
+});
+
 app.route('/api/hello', helloApi);
 
 // Login page
