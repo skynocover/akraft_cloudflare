@@ -18,6 +18,7 @@ interface ServicePageProps {
   user?: { name: string; email: string } | null;
   isAdmin?: boolean;
   searchQuery?: string;
+  turnstileSiteKey?: string;
 }
 
 export const ServicePage: FC<ServicePageProps> = ({
@@ -30,6 +31,7 @@ export const ServicePage: FC<ServicePageProps> = ({
   user,
   isAdmin,
   searchQuery,
+  turnstileSiteKey,
 }) => {
   if (!service) {
     return (
@@ -53,7 +55,7 @@ export const ServicePage: FC<ServicePageProps> = ({
     : `/service/${serviceId}`;
 
   return (
-    <Layout title={service.name}>
+    <Layout title={service.name} turnstileSiteKey={turnstileSiteKey}>
       <div class="container mx-auto px-6 pb-6 pt-2 max-w-6xl">
         <TopLink links={service.metadata?.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} user={user} currentPath={`/service/${serviceId}`} searchQuery={searchQuery} />
         <Title title={service.name || ""} links={service.metadata?.headLinks || []} />

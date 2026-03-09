@@ -34,7 +34,7 @@ export function markdownToHtml(text: string): string {
 		}
 		// Reply reference (>> No.xxx) - must check before blockquote
 		else if (html.startsWith("&gt;&gt; ")) {
-			const refId = html.slice(9).trim();
+			const refId = html.slice(9).trim().replace(/[^a-zA-Z0-9_-]/g, "");
 			html = `<p class="text-blue-500 hover:underline cursor-pointer mb-1" onclick="document.getElementById('${refId}')?.scrollIntoView({behavior:'smooth'})">&gt;&gt; ${refId}</p>`;
 		}
 		// Blockquote (> text)
@@ -87,7 +87,7 @@ function markdownToHtml(text) {
     } else if (html.startsWith("# ")) {
       html = '<h1 class="text-xl font-bold mt-2 mb-1">' + html.slice(2) + '</h1>';
     } else if (html.startsWith("&gt;&gt; ")) {
-      var refId = html.slice(9).trim();
+      var refId = html.slice(9).trim().replace(/[^a-zA-Z0-9_-]/g, "");
       html = '<p class="text-blue-500 hover:underline cursor-pointer mb-1" onclick="document.getElementById(\\'' + refId + '\\')?.scrollIntoView({behavior:\\'smooth\\'})">&gt;&gt; ' + refId + '</p>';
     } else if (html.startsWith("&gt; ")) {
       html = '<blockquote class="border-l-4 border-gray-300 pl-4 italic my-1 text-gray-600">' + html.slice(5) + '</blockquote>';

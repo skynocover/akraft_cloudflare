@@ -13,6 +13,7 @@ interface ThreadPageProps {
   adminUrl?: string;
   user?: { name: string; email: string } | null;
   isAdmin?: boolean;
+  turnstileSiteKey?: string;
 }
 
 export const ThreadPage: FC<ThreadPageProps> = ({
@@ -22,6 +23,7 @@ export const ThreadPage: FC<ThreadPageProps> = ({
   adminUrl,
   user,
   isAdmin,
+  turnstileSiteKey,
 }) => {
   if (!service || !thread) {
     return (
@@ -43,7 +45,7 @@ export const ThreadPage: FC<ThreadPageProps> = ({
   }
 
   return (
-    <Layout title={`${thread.title} - ${service.name}`}>
+    <Layout title={`${thread.title} - ${service.name}`} turnstileSiteKey={turnstileSiteKey}>
       <div class="container mx-auto px-6 pb-6 pt-2 max-w-6xl">
         <TopLink links={service.metadata?.topLinks || []} serviceId={serviceId} adminUrl={adminUrl} user={user} currentPath={`/service/${serviceId}/${thread.id}`} showSearch={false} />
         <Title title={service.name || ""} links={service.metadata?.headLinks || []} />

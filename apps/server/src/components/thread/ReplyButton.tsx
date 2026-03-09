@@ -39,7 +39,7 @@ export const ReplyButton: FC<ReplyButtonProps> = ({
       <button
         type="button"
         class="p-2 hover:bg-blue-100 hover:border-blue-300 transition-colors duration-200 rounded"
-        onclick={`document.getElementById('${modalId}').style.display='flex'`}
+        onclick={`document.getElementById('${modalId}').style.display='flex'; if(window.renderTurnstileWidget) renderTurnstileWidget('turnstile-${modalId}')`}
         title="Reply"
       >
         <MessageSquareIcon />
@@ -90,7 +90,7 @@ export const ReplyNoButton: FC<ReplyNoButtonProps> = ({
     <>
       <span
         class="text-blue-400 ml-1 hover:underline cursor-pointer"
-        onclick={`document.getElementById('${modalId}').style.display='flex'`}
+        onclick={`document.getElementById('${modalId}').style.display='flex'; if(window.renderTurnstileWidget) renderTurnstileWidget('turnstile-${modalId}')`}
       >
         No. {targetId}
       </span>

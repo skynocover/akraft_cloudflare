@@ -15,6 +15,9 @@ export type CloudflareEnv = {
   // Content Safety (Azure)
   CONTENT_SAFETY_ENDPOINT?: string;
   CONTENT_SAFETY_API_KEY?: string;
+  // Cloudflare Turnstile
+  CLOUDFLARE_TURNSTILE_KEY?: string;
+  CLOUDFLARE_TURNSTILE_SECRET?: string;
 };
 
 declare global {

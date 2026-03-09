@@ -1,63 +1,49 @@
-# 發文時顯示 Admin - 實作完成
+# Cloudflare Turnstile 真人驗證 - 已完成
 
-## 已完成功能
+## 已完成項目
 
-### Phase 1：登入功能 ✅
-1. ✅ 創建 `/login` 頁面（HonoX SSR）- Google OAuth 登入
-2. ✅ 修改 TopLink，根據 session 顯示 Login/用戶名稱（不明顯樣式）
-3. ✅ 實作登出功能 (`/logout`)
+### Phase 1：後端驗證 ✅
+1. ✅ `env.d.ts` — 新增 `CLOUDFLARE_TURNSTILE_KEY` 和 `CLOUDFLARE_TURNSTILE_SECRET`
+2. ✅ `lib/safety/turnstile.ts` — 建立 Turnstile token 驗證工具
+3. ✅ `index.ts` — 在 thread/reply POST handler 加入 Turnstile 驗證
 
-### Phase 2：發文標記 ✅
-4. ✅ 修改 `threads` 和 `replies` schema，新增 `isAdmin` 欄位
-5. ✅ 修改發文 API，檢查 session 並設置 `isAdmin`
-6. ✅ 修改 PostCard，根據登入狀態顯示不同按鈕文字
-   - 未登入：`Submit` / `Submit reply`
-   - 已登入 (Admin)：`Submit as Admin` / `Submit reply as Admin`（紅色按鈕）
+### Phase 2：前端 Widget ✅
+4. ✅ `Layout.tsx` — 加入 Turnstile script（explicit render 模式）+ 全域 helper
+5. ✅ `PostCard.tsx` — 加入 Turnstile widget 容器，表單送出前驗證
+6. ✅ `ReplyButton.tsx` — Modal 開啟時呼叫 renderTurnstileWidget()
 
-### Phase 3：顯示樣式 ✅
-7. ✅ 修改 Post 元件，Admin 發文顯示特殊樣式
-   - 紅色名稱
-   - 紅色 "Admin" 標籤
+### Phase 3：頁面串接 ✅
+7. ✅ `servicePage.tsx` — 傳遞 turnstileSiteKey 給 Layout
+8. ✅ `threadPage.tsx` — 傳遞 turnstileSiteKey 給 Layout
+9. ✅ `index.ts` — 從 env 傳遞 key 給頁面元件
 
 ---
 
-## 技術細節
+## 設計決策
 
-### 登入流程
+- **使用 global variable** (`window.__TURNSTILE_SITE_KEY`) 避免 prop drilling
+- **Explicit render mode** — modal 內的 widget 需要在開啟時才渲染
+- **Optional** — 未設定 key 時跳過驗證，向下相容
+
+## 修改的檔案
+
+- `apps/server/env.d.ts` — 新增環境變數類型
+- `apps/server/src/lib/safety/turnstile.ts` — 新檔案，Turnstile 驗證工具
+- `apps/server/src/components/Layout.tsx` — Turnstile script + 全域 helper
+- `apps/server/src/components/thread/PostCard.tsx` — Turnstile widget + 前端驗證
+- `apps/server/src/components/thread/ReplyButton.tsx` — Modal 開啟時渲染 widget
+- `apps/server/src/app/routes/service/servicePage.tsx` — 傳遞 turnstileSiteKey
+- `apps/server/src/app/routes/service/threadPage.tsx` — 傳遞 turnstileSiteKey
+- `apps/server/src/index.ts` — 傳遞 key + 後端 Turnstile 驗證
+
+## 環境變數
+
+```bash
+CLOUDFLARE_TURNSTILE_KEY=your-site-key
+CLOUDFLARE_TURNSTILE_SECRET=your-secret-key
 ```
-用戶點擊 Login → /login 頁面 → Google OAuth → 回調原頁面
-```
-
-### Admin 判斷邏輯
-- 檢查用戶是否為 organization 的 owner 或 admin
-- 使用 `member` 表的 role 欄位判斷
-
-### 修改的檔案
-- `apps/server/src/app/routes/loginPage.tsx` - 登入頁面
-- `apps/server/src/components/layout/TopLink.tsx` - 頂部連結（含登入/登出）
-- `apps/server/src/components/layout/Header.tsx` - 首頁 Header
-- `apps/server/src/components/thread/PostCard.tsx` - 發文表單
-- `apps/server/src/components/thread/Post.tsx` - 貼文顯示
-- `apps/server/src/components/thread/Thread.tsx` - 討論串
-- `apps/server/src/components/thread/ReplyButton.tsx` - 回覆按鈕
-- `apps/server/src/app/routes/service/servicePage.tsx` - 服務頁面
-- `apps/server/src/app/routes/service/threadPage.tsx` - 討論串頁面
-- `apps/server/src/index.ts` - 路由和 API
-- `apps/server/src/lib/db/queries.ts` - 資料庫查詢
-- `apps/server/src/types/forum.ts` - 類型定義
-- `packages/db/src/schema/forum.ts` - 資料庫 schema
-
-### 資料庫變更
-```sql
-ALTER TABLE threads ADD COLUMN is_admin INTEGER DEFAULT 0;
-ALTER TABLE replies ADD COLUMN is_admin INTEGER DEFAULT 0;
-```
-
----
 
 ## 部署注意事項
 
-遠端資料庫需要執行遷移：
-```bash
-wrangler d1 execute akraft-db --remote --command="ALTER TABLE threads ADD COLUMN is_admin INTEGER DEFAULT 0; ALTER TABLE replies ADD COLUMN is_admin INTEGER DEFAULT 0;"
-```
+- 在 Cloudflare Workers 設定中加入 `CLOUDFLARE_TURNSTILE_KEY` 和 `CLOUDFLARE_TURNSTILE_SECRET`
+- Turnstile 是 optional 的 — 未設定 key 時不影響現有功能

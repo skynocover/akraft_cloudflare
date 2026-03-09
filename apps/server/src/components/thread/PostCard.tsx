@@ -94,6 +94,7 @@ export const PostCard: FC<PostCardProps> = ({
   const tabsId = `tabs-${uniqueId}`;
   const previewId = `preview-${uniqueId}`;
   const contentId = `content-${uniqueId}`;
+  const turnstileId = `turnstile-${uniqueId}`;
 
   return (
     <Card class={`mb-4 shadow-md ${isReply ? 'w-full max-w-md mx-auto' : 'mx-auto max-w-3xl'}`}>
@@ -124,6 +125,13 @@ export const PostCard: FC<PostCardProps> = ({
             if (hasImage && fileInput.files[0].size > 5 * 1024 * 1024) {
               alert('File size exceeds 5MB limit');
               return false;
+            }
+            if (window.__TURNSTILE_SITE_KEY) {
+              var tsInput = document.querySelector('#${formId} input[name="cf-turnstile-response"]');
+              if (!tsInput || !tsInput.value) {
+                alert('Please complete the verification');
+                return false;
+              }
             }
             var submitBtn = document.getElementById('${formId}-submit');
             var loadingIndicator = document.getElementById('${formId}-loading');
@@ -296,6 +304,9 @@ export const PostCard: FC<PostCardProps> = ({
               dangerouslySetInnerHTML={{ __html: markdownToHtml(description) }}
             />
           )}
+
+          {/* Cloudflare Turnstile widget */}
+          <div id={turnstileId} class="turnstile-widget"></div>
 
           <div class="flex gap-2">
             <Button

@@ -31,6 +31,7 @@ import { uploadImage } from './lib/r2/upload';
 // Safety & Moderation
 import { checkModeration } from './lib/safety/moderation';
 import { isContentSafetyEnabled, checkContentSafety } from './lib/safety/content-safety';
+import { checkTurnstile } from './lib/safety/turnstile';
 
 const app = new Hono();
 
@@ -204,6 +205,7 @@ app.get('/service/:serviceId', async (c) => {
     user,
     isAdmin,
     searchQuery,
+    turnstileSiteKey: env.CLOUDFLARE_TURNSTILE_KEY,
   });
   return c.html(html as string);
 });
@@ -225,7 +227,7 @@ app.get('/service/:serviceId/:threadId', async (c) => {
   // Get session info to check if user is admin
   const { user, isAdmin } = await getSessionInfo(c, serviceId);
 
-  const html = ThreadPage({ serviceId, service, thread, adminUrl, user, isAdmin });
+  const html = ThreadPage({ serviceId, service, thread, adminUrl, user, isAdmin, turnstileSiteKey: env.CLOUDFLARE_TURNSTILE_KEY });
   return c.html(html as string);
 });
 
@@ -289,10 +291,16 @@ app.post('/api/service/:serviceId/thread', async (c) => {
     return c.text('Service not found', 404);
   }
 
-  // Check moderation (IP blocking, forbidden words, rate limiting)
+  // Check moderation (IP blocking, forbidden words, rate limiting) — cheap, runs first
   const moderationResult = checkModeration(service, userIp, content, title);
   if (!moderationResult.allowed) {
     return c.text(moderationResult.reason || 'Content not allowed', 403);
+  }
+
+  // Verify Turnstile token — after cheap checks to avoid unnecessary network calls
+  const turnstileResult = await checkTurnstile(env.CLOUDFLARE_TURNSTILE_SECRET, formData, userIp);
+  if (!turnstileResult.allowed) {
+    return c.text(turnstileResult.reason || 'Captcha verification failed', 403);
   }
 
   // Check content safety (Azure Content Safety API)
@@ -395,10 +403,16 @@ app.post('/api/service/:serviceId/reply', async (c) => {
     return c.text('Service not found', 404);
   }
 
-  // Check moderation (IP blocking, forbidden words, rate limiting)
+  // Check moderation (IP blocking, forbidden words, rate limiting) — cheap, runs first
   const moderationResult = checkModeration(service, userIp, content);
   if (!moderationResult.allowed) {
     return c.text(moderationResult.reason || 'Content not allowed', 403);
+  }
+
+  // Verify Turnstile token — after cheap checks to avoid unnecessary network calls
+  const turnstileResult = await checkTurnstile(env.CLOUDFLARE_TURNSTILE_SECRET, formData, userIp);
+  if (!turnstileResult.allowed) {
+    return c.text(turnstileResult.reason || 'Captcha verification failed', 403);
   }
 
   // Check content safety (Azure Content Safety API)

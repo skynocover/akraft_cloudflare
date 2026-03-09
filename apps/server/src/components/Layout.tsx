@@ -3,9 +3,10 @@ import { markdownToHtmlScript } from "../lib/utils";
 
 interface LayoutProps extends PropsWithChildren {
   title?: string;
+  turnstileSiteKey?: string;
 }
 
-export const Layout: FC<LayoutProps> = ({ children, title = "Forum" }) => {
+export const Layout: FC<LayoutProps> = ({ children, title = "Forum", turnstileSiteKey }) => {
   return (
     <html lang="zh-TW">
       <head>
@@ -21,6 +22,48 @@ export const Layout: FC<LayoutProps> = ({ children, title = "Forum" }) => {
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4832588143134491"
           crossorigin="anonymous"
         />
+        {/* Cloudflare Turnstile */}
+        {turnstileSiteKey && (
+          <>
+            <script
+              src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad"
+              async
+              defer
+            />
+            <script dangerouslySetInnerHTML={{ __html: `
+              window.__TURNSTILE_SITE_KEY = ${JSON.stringify(turnstileSiteKey)};
+              function renderTurnstileWidget(containerId, retries) {
+                var el = document.getElementById(containerId);
+                if (!el || el.dataset.rendered === 'true') return;
+                retries = retries || 0;
+                if (window.turnstile) {
+                  turnstile.render(el, {
+                    sitekey: window.__TURNSTILE_SITE_KEY,
+                    theme: 'light'
+                  });
+                  el.dataset.rendered = 'true';
+                } else if (retries < 10) {
+                  setTimeout(function() { renderTurnstileWidget(containerId, retries + 1); }, 500);
+                }
+              }
+              function renderVisibleWidgets() {
+                var widgets = document.querySelectorAll('.turnstile-widget');
+                for (var i = 0; i < widgets.length; i++) {
+                  if (widgets[i].offsetParent !== null) {
+                    renderTurnstileWidget(widgets[i].id);
+                  }
+                }
+              }
+              function onTurnstileLoad() {
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', renderVisibleWidgets);
+                } else {
+                  renderVisibleWidgets();
+                }
+              }
+            ` }} />
+          </>
+        )}
       </head>
       <body class="min-h-screen bg-background font-sans antialiased">
         <script dangerouslySetInnerHTML={{ __html: markdownToHtmlScript }} />
